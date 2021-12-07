@@ -7,7 +7,13 @@ unsigned char endpoint_out = 0x02;
 libusb_device_handle *device;
 int initialized = 0;
 
+enum gc_status {
+    GC_NOT_AVAILABLE = 0x00,
+    GC_PRESENT = 0x10,
+};
+
 typedef struct gc_inputs {
+    unsigned char status_old;
     unsigned char status;
     union {
         char btn_l;
@@ -37,6 +43,13 @@ typedef struct gc_inputs {
     char cy;
     unsigned char lt;
     unsigned char rt;
+    char ax_rest;
+    char ay_rest;
+    char cx_rest;
+    char cy_rest;
+    unsigned char lt_rest;
+    unsigned char rt_rest;
+
 } gc_inputs;
 
 static void error(const char msg[])
@@ -142,15 +155,38 @@ int gc_get_inputs(gc_inputs gc[])
 
     for (int i = 0; i < 4; ++i) {
         int offset = i * 9;
+        gc[i].status_old = gc[i].status;
+
         gc[i].status = readbuf[offset+1];
         gc[i].btn_l  = readbuf[offset+2];
         gc[i].btn_h  = readbuf[offset+3];
-        gc[i].ax     = readbuf[offset+4]-128; // TODO: proper calibration
-        gc[i].ay     = readbuf[offset+5]-128;
-        gc[i].cx     = readbuf[offset+6]-128;
-        gc[i].cy     = readbuf[offset+7]-128;
+        gc[i].ax     = readbuf[offset+4];
+        gc[i].ay     = readbuf[offset+5];
+        gc[i].cx     = readbuf[offset+6];
+        gc[i].cy     = readbuf[offset+7];
         gc[i].lt     = readbuf[offset+8];
         gc[i].rt     = readbuf[offset+9];
+
+        // calibrate centers if just plugged in
+        if (gc[i].status_old == GC_NOT_AVAILABLE && gc[i].status == GC_PRESENT) {
+            gc[i].ax_rest = gc[i].ax;
+            gc[i].ay_rest = gc[i].ay;
+            gc[i].cx_rest = gc[i].cx;
+            gc[i].cy_rest = gc[i].cy;
+            gc[i].lt_rest = gc[i].lt;
+            gc[i].rt_rest = gc[i].rt;
+        }
+
+        // remove offsets
+        gc[i].ax -= gc[i].ax_rest;
+        gc[i].ay -= gc[i].ay_rest;
+        gc[i].cx -= gc[i].cx_rest;
+        gc[i].cy -= gc[i].cy_rest;
+
+        // lets ignore trigger calib for now because
+        // this is certainly not the right way to do it
+        //gc[i].lt -= gc[i].lt_rest;
+        //gc[i].rt -= gc[i].rt_rest;
     }
 
     return 0;

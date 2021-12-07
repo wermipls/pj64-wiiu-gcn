@@ -69,7 +69,7 @@ EXPORT void CALL GetKeys(int Control, BUTTONS *Keys)
     gc_inputs *i = &gamecube[Control];
     Keys->Value = 0;
 
-    if (!i->status) {
+    if (i->status == GC_NOT_AVAILABLE) {
         return;
     }
 
@@ -102,7 +102,7 @@ EXPORT void CALL InitiateControllers(HWND hMainWindow, CONTROL Controls[4])
         return;
 
     for (int i = 0; i < 4; ++i) {
-        Controls[i].Present = !!gamecube[i].status;
+        Controls[i].Present = gamecube[i].status == GC_PRESENT;
         Controls[i].RawData = FALSE;
         Controls[i].Plugin = PLUGIN_NONE;
     }
