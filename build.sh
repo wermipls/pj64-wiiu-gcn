@@ -1,0 +1,1 @@
+gcc main.c -shared -static-libgcc -static -lshlwapi -l:libusb-1.0.a -o pj64-wiiu-gcn.dll
