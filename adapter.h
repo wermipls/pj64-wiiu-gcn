@@ -93,7 +93,7 @@ void gc_init()
     }
 
     // nyko fix
-    const int transfer = libusb_control_transfer(device, 0x21, 11, 0x0001, 0, NULL, 0, 1000);
+    libusb_control_transfer(device, 0x21, 11, 0x0001, 0, NULL, 0, 1000);
 
     err = libusb_claim_interface(device, 0);
     if (err) {
