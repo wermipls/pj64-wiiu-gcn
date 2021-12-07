@@ -7,6 +7,7 @@
 #define PLUGIN_NAME "pj64-wiiu-gcn"
 #define PLUGIN_VERSION "0.0.1"
 #define PLUGIN_NAMEVER PLUGIN_NAME " v" PLUGIN_VERSION
+#define PLUGIN_REPO "https://github.com/wermipls/pj64-wiiu-gcn"
 
 gc_inputs gamecube[4];
 
@@ -31,9 +32,10 @@ EXPORT void CALL DllAbout(HWND hParent)
 {
 	MessageBoxA(
         hParent, 
-        "Proof of concept Wii U Gamecube input plugin\n\n"
-        "Version " PLUGIN_VERSION "\n\n"
-        "Compiled on " __DATE__,
+        "Proof of concept Wii U Gamecube adapter plugin\n"
+        "Version " PLUGIN_VERSION "\n"
+        "Compiled on " __DATE__ "\n\n"
+        PLUGIN_REPO,
         "About " PLUGIN_NAMEVER,
         MB_OK
     );
