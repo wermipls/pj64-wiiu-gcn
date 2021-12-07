@@ -124,7 +124,7 @@ void gc_deinit()
     initialized = 0;
 }
 
-int gc_get_inputs(gc_inputs *i)
+int gc_get_inputs(gc_inputs gc[])
 {
     if (!initialized) return -1;
 
@@ -140,15 +140,18 @@ int gc_get_inputs(gc_inputs *i)
         return -2;
     }
 
-    i->status = readbuf[1];
-    i->btn_l  = readbuf[2];
-    i->btn_h  = readbuf[3];
-    i->ax     = readbuf[4]-128; // TODO: proper calibration
-    i->ay     = readbuf[5]-128;
-    i->cx     = readbuf[6]-128;
-    i->cy     = readbuf[7]-128;
-    i->lt     = readbuf[8];
-    i->rt     = readbuf[9];
+    for (int i = 0; i < 4; ++i) {
+        int offset = i * 9;
+        gc[i].status = readbuf[offset+1];
+        gc[i].btn_l  = readbuf[offset+2];
+        gc[i].btn_h  = readbuf[offset+3];
+        gc[i].ax     = readbuf[offset+4]-128; // TODO: proper calibration
+        gc[i].ay     = readbuf[offset+5]-128;
+        gc[i].cx     = readbuf[offset+6]-128;
+        gc[i].cy     = readbuf[offset+7]-128;
+        gc[i].lt     = readbuf[offset+8];
+        gc[i].rt     = readbuf[offset+9];
+    }
 
     return 0;
 }
