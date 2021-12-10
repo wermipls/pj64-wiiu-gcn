@@ -1,5 +1,6 @@
 #include <libusb-1.0/libusb.h>
 #include <stdio.h>
+#include "log.h"
 
 unsigned char endpoint_in = 0x81;
 unsigned char endpoint_out = 0x02;
@@ -52,11 +53,6 @@ typedef struct gc_inputs {
 
 } gc_inputs;
 
-static void error(const char msg[])
-{
-    MessageBoxA(NULL, msg, "Error", MB_OK | MB_ICONERROR);
-}
-
 static void debug_print_hex(unsigned char data[], int len)
 {
     char msg[1024];
@@ -69,26 +65,25 @@ static void debug_print_hex(unsigned char data[], int len)
         snprintf(buf, sizeof(buf), "%02X ", data[i]);
         strcat(msg, buf);
     }
-
-    MessageBoxA(NULL, msg, "Debug", MB_OK);
 }
 
 void gc_init()
 {
+    dlog(LOG_INFO, "gc_init()");
     if (initialized) return;
 
     int err;
 
     err = libusb_init(NULL);
     if (err) {
-        error("Failed to initialize libusb");
+        dlog(LOG_ERR, "Failed to initialize libusb");
         return;
     }
 
     // open first available device
     device = libusb_open_device_with_vid_pid(NULL, 0x057E, 0x0337);
     if (!device) {
-        error("Failed to open adapter");
+        dlog(LOG_ERR, "Failed to open adapter");
         return;
     }
 
@@ -97,7 +92,7 @@ void gc_init()
 
     err = libusb_claim_interface(device, 0);
     if (err) {
-        error(libusb_error_name(err));
+        dlog(LOG_ERR, "Failed to claim interface, %s", libusb_error_name(err));
         return;
     }
 
@@ -110,14 +105,14 @@ void gc_init()
         device, endpoint_out, &cmd, sizeof(cmd), &transferred, 16
     );
     if (err) {
-        error(libusb_error_name(err));
+        dlog(LOG_ERR, "Failed out transfer, %s", libusb_error_name(err));
     }
 
     err = libusb_interrupt_transfer(
         device, endpoint_in, readbuf, sizeof(readbuf), &transferred, 16
     );
     if (err) {
-        error(libusb_error_name(err));
+        dlog(LOG_ERR, "Failed in transfer, %s", libusb_error_name(err));
     }
 
     initialized = 1;
@@ -125,9 +120,11 @@ void gc_init()
 
 void gc_deinit()
 {
+    dlog(LOG_INFO, "gc_deinit()");
     if (!initialized) return;
 
     if (device) {
+        dlog(LOG_INFO, "Closing the adapter");
         libusb_release_interface(device, 0);
         libusb_close(device);
     }
@@ -148,9 +145,12 @@ int gc_get_inputs(gc_inputs gc[])
         device, endpoint_in, readbuf, sizeof(readbuf), &transferred, 16
     );
     if (err) {
-        error(libusb_error_name(err));
+        dlog(LOG_ERR, "Failed in transfer, %s", libusb_error_name(err));
         gc_deinit();
         return -2;
+    }
+    if (transferred != 37) {
+        dlog(LOG_WARN, "Expected %d bytes response, got %d", 37, transferred);
     }
 
     for (int i = 0; i < 4; ++i) {
@@ -169,6 +169,7 @@ int gc_get_inputs(gc_inputs gc[])
 
         // calibrate centers if just plugged in
         if (gc[i].status_old == GC_NOT_AVAILABLE && gc[i].status == GC_PRESENT) {
+            dlog(LOG_INFO, "Controller %d plugged in, calibrating centers", i);
             gc[i].ax_rest = gc[i].ax;
             gc[i].ay_rest = gc[i].ay;
             gc[i].cx_rest = gc[i].cx;

@@ -1,13 +1,14 @@
 #define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-#include <Shlwapi.h>
-#include "zilmar_controller_1.0.h"
-#include "adapter.h"
 
 #define PLUGIN_NAME "pj64-wiiu-gcn"
 #define PLUGIN_VERSION "0.0.1"
 #define PLUGIN_NAMEVER PLUGIN_NAME " v" PLUGIN_VERSION
 #define PLUGIN_REPO "https://github.com/wermipls/pj64-wiiu-gcn"
+
+#include <Windows.h>
+#include <Shlwapi.h>
+#include "zilmar_controller_1.0.h"
+#include "adapter.h"
 
 gc_inputs gamecube[4];
 
@@ -16,8 +17,10 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
     switch (fdwReason)
     {
     case DLL_PROCESS_ATTACH:
+        log_open();
         break;
     case DLL_PROCESS_DETACH:
+        log_close();
         break;
     }
     return TRUE;
@@ -98,12 +101,27 @@ EXPORT void CALL GetKeys(int Control, BUTTONS *Keys)
 
 EXPORT void CALL InitiateControllers(HWND hMainWindow, CONTROL Controls[4])
 {
+    dlog(LOG_INFO, "InitiateControllers()");
     gc_init();
     int err = gc_get_inputs(gamecube);
     if (err)
         return;
 
     for (int i = 0; i < 4; ++i) {
+        switch (gamecube[i].status)
+        {
+            case GC_PRESENT:
+                Controls[i].Present = TRUE;
+                dlog(LOG_INFO, "Controller %d present", i);
+                break;
+            case GC_NOT_AVAILABLE:
+                Controls[i].Present = FALSE;
+                dlog(LOG_INFO, "Controller %d not available", i);
+                break;
+            default:
+                Controls[i].Present = TRUE; // assuming its plugged in regardless
+                dlog(LOG_WARN, "Unknown controller %d status: %d", i, gamecube[i].status);
+        }
         Controls[i].Present = gamecube[i].status == GC_PRESENT;
         Controls[i].RawData = FALSE;
         Controls[i].Plugin = PLUGIN_NONE;
