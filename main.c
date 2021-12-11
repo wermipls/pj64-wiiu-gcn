@@ -9,14 +9,17 @@
 #include <Shlwapi.h>
 #include "zilmar_controller_1.0.h"
 #include "adapter.h"
+#include "gui.h"
 
 gc_inputs gamecube[4];
+HINSTANCE hInstance;
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
 {
     switch (fdwReason)
     {
     case DLL_PROCESS_ATTACH:
+        hInstance = hinstDLL;
         log_open();
         break;
     case DLL_PROCESS_DETACH:
@@ -44,7 +47,10 @@ EXPORT void CALL DllAbout(HWND hParent)
     );
 }
 
-//EXPORT void CALL DllConfig(HWND hParent);
+EXPORT void CALL DllConfig(HWND hParent)
+{
+    config_window(hInstance, hParent);
+}
 
 //EXPORT void CALL DllTest(HWND hParent);
 
