@@ -16,7 +16,7 @@ INT_PTR CALLBACK dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lParam)
                     break;
             }
         default:
-        return FALSE;
+            return FALSE;
     }
 
     return TRUE;
