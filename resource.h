@@ -4,19 +4,12 @@
 //
 #define IDD_FORMVIEW                    101
 #define IDD_DIALOG1                     103
-#define IDC_CHECK1                      1000
 #define IDC_SWAPZL                      1000
-#define IDC_CHECK2                      1001
 #define IDC_ANALOGTRIG                  1001
-#define IDC_SLIDER1                     1002
 #define IDC_SLIDER_RANGE                1002
-#define IDC_SLIDER2                     1005
 #define IDC_SLIDER_TRIGTHRES            1005
-#define IDC_BUTTON1                     1006
 #define IDC_TESTPOLL                    1006
-#define IDC_RADIO1                      1007
 #define IDC_XY_CB                       1007
-#define IDC_RADIO2                      1008
 #define IDC_Y_AS_L                      1008
 #define IDC_SLIDER3                     1009
 #define IDC_SLIDER_CSTICKTHRES          1010
