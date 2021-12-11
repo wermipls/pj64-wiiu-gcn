@@ -2,11 +2,13 @@
 #include <stdarg.h>
 #include <time.h>
 
+const char logpath[] = "./Logs/" PLUGIN_NAME ".txt";
 FILE *logfile;
 
 void log_open()
 {
-    logfile = fopen("./Logs/" PLUGIN_NAME ".txt", "w");
+    CreateDirectory("Logs", NULL);
+    logfile = fopen(logpath, "w");
 }
 
 void log_close()

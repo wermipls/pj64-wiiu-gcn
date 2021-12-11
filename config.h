@@ -47,6 +47,7 @@ void config_save()
 {
     FILE *f = fopen(configpath, "wb");
 
+    CreateDirectory("Config", NULL);
     fwrite(&cfg, sizeof(cfg), 1, f);
 
     fclose(f);
