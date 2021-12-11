@@ -28,7 +28,7 @@ void slider_updatecfg(HWND slider)
         case IDC_SLIDER_CSTICKTHRES:
             cfg.cstick_thres = pos;
             break;
-        case IDC_SLIDER_TRIGTHRES3:
+        case IDC_SLIDER_DZ:
             cfg.dz = pos;
             break;
     }
@@ -46,7 +46,7 @@ void init_all(HWND diag)
     init_slider(diag, IDC_SLIDER_RANGE, 0, 100, cfg.range);
     init_slider(diag, IDC_SLIDER_TRIGTHRES, 0, 255, cfg.trig_thres);
     init_slider(diag, IDC_SLIDER_CSTICKTHRES, 0, 127, cfg.cstick_thres);
-    init_slider(diag, IDC_SLIDER_TRIGTHRES3, 0, 100, cfg.dz);
+    init_slider(diag, IDC_SLIDER_DZ, 0, 100, cfg.dz);
     // set those to blank for now because
     // converting to percentage is not implemented
     SetWindowText(GetDlgItem(diag, IDC_LABEL_RANGE), "");

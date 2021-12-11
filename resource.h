@@ -20,7 +20,7 @@
 #define IDC_Y_AS_L                      1008
 #define IDC_SLIDER3                     1009
 #define IDC_SLIDER_CSTICKTHRES          1010
-#define IDC_SLIDER_TRIGTHRES3           1011
+#define IDC_SLIDER_DZ                   1011
 #define IDC_LABEL_RANGE                 1012
 #define IDC_LABEL_TRIGTHRES             1013
 #define IDC_LABEL_CSTICKTHRES           1014

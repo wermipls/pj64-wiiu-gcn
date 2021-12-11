@@ -51,7 +51,7 @@ BEGIN
                     WS_TABSTOP,85,80,105,17
     CONTROL         "Slider1",IDC_SLIDER_CSTICKTHRES,"msctls_trackbar32",
                     WS_TABSTOP,85,105,105,17
-    CONTROL         "Slider1",IDC_SLIDER_TRIGTHRES3,"msctls_trackbar32",
+    CONTROL         "Slider1",IDC_SLIDER_DZ,"msctls_trackbar32",
                     WS_TABSTOP,85,130,105,17
     GROUPBOX        "GC X/Y function",IDC_STATIC,10,170,125,50
     CONTROL         "Y/X as N64 C-Left/Right",IDC_XY_CB,"Button",
