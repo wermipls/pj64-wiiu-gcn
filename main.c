@@ -9,7 +9,9 @@
 #include <Shlwapi.h>
 #include "zilmar_controller_1.0.h"
 #include "adapter.h"
+#include "config.h"
 #include "gui.h"
+#include "util.h"
 
 gc_inputs gamecube[4];
 HINSTANCE hInstance;
@@ -21,6 +23,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
     case DLL_PROCESS_ATTACH:
         hInstance = hinstDLL;
         log_open();
+        config_load();
         break;
     case DLL_PROCESS_DETACH:
         log_close();
@@ -84,14 +87,26 @@ EXPORT void CALL GetKeys(int Control, BUTTONS *Keys)
         return;
     }
 
-    Keys->X_AXIS = (int)i->ay * 200 / 250; // 80% range
-    Keys->Y_AXIS = (int)i->ax * 200 / 250;
+    Keys->X_AXIS = deadzone(i->ay, cfg.dz) * cfg.range / 100;
+    Keys->Y_AXIS = deadzone(i->ax, cfg.dz) * cfg.range / 100;
 
     Keys->A_BUTTON = i->a;
     Keys->B_BUTTON = i->b;
-    Keys->Z_TRIG = i->l || i->lt > 128;
-    Keys->R_TRIG = i->r || i->rt > 128;
-    Keys->L_TRIG = i->z;
+
+    int lt = cfg.analog_trig ? i->lt > cfg.trig_thres
+                             : 0;
+    int rt = cfg.analog_trig ? i->rt > cfg.trig_thres
+                             : 0;
+
+    if (cfg.swap_zl) {
+        Keys->Z_TRIG = i->l || lt;
+        Keys->L_TRIG = i->z;
+    } else {
+        Keys->Z_TRIG = i->z;
+        Keys->L_TRIG = i->l || lt;
+    }
+
+    Keys->R_TRIG = i->r || rt;
     Keys->START_BUTTON = i->start;
 
     Keys->L_DPAD = i->dleft;
@@ -99,10 +114,22 @@ EXPORT void CALL GetKeys(int Control, BUTTONS *Keys)
     Keys->U_DPAD = i->dup;
     Keys->D_DPAD = i->ddown;
 
-    Keys->L_CBUTTON = i->cx < -32 || i->y;
-    Keys->R_CBUTTON = i->cx >  32 || i->x;
-    Keys->D_CBUTTON = i->cy < -32;
-    Keys->U_CBUTTON = i->cy >  32;
+    Keys->L_CBUTTON = i->cx < -cfg.cstick_thres;
+    Keys->R_CBUTTON = i->cx >  cfg.cstick_thres;
+    Keys->D_CBUTTON = i->cy < -cfg.cstick_thres;
+    Keys->U_CBUTTON = i->cy >  cfg.cstick_thres;
+
+    if (cfg.xy_mode == XY_CBUTTONS) {
+        Keys->L_CBUTTON |= i->y;
+        Keys->R_CBUTTON |= i->x;
+    } else {
+        Keys->L_TRIG |= i->y;
+
+        Keys->L_CBUTTON |= i->x;
+        Keys->R_CBUTTON |= i->x;
+        Keys->D_CBUTTON |= i->x;
+        Keys->U_CBUTTON |= i->x;
+    }
 }
 
 EXPORT void CALL InitiateControllers(HWND hMainWindow, CONTROL Controls[4])
