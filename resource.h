@@ -6,6 +6,7 @@
 #define IDD_DIALOG1                     103
 #define IDC_SWAPZL                      1000
 #define IDC_ANALOGTRIG                  1001
+#define IDC_ZL_AS_Z                     1003
 #define IDC_SLIDER_RANGE                1002
 #define IDC_SLIDER_TRIGTHRES            1005
 #define IDC_TESTPOLL                    1006

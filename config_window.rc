@@ -26,7 +26,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_DEFAULT
 // Dialog
 //
 
-IDD_DIALOG1 DIALOG DISCARDABLE  0, 0, 212, 229
+IDD_DIALOG1 DIALOG DISCARDABLE  0, 0, 212, 244
 STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "pj64-wiiu-gcn config"
 FONT 8, "MS Sans Serif"
@@ -35,31 +35,33 @@ BEGIN
                     WS_TABSTOP,9,9,73,10
     CONTROL         "Analog triggers",IDC_ANALOGTRIG,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,9,23,63,10
-    PUSHBUTTON      "Test adapter pollrate",IDC_TESTPOLL,125,20,75,14
-    GROUPBOX        "Analog settings",IDC_STATIC,9,43,191,117
-    LTEXT           "Analog stick range",IDC_STATIC,19,57,60,8
-    LTEXT           "Trigger threshold",IDC_STATIC,19,82,54,8
-    LTEXT           "C-Stick threshold",IDC_STATIC,20,107,54,8
-    LTEXT           "Deadzone",IDC_STATIC,20,132,34,8
-    CTEXT           "0%",IDC_LABEL_RANGE,85,73,105,8
-    CTEXT           "0%",IDC_LABEL_TRIGTHRES,85,97,105,8
-    CTEXT           "0%",IDC_LABEL_CSTICKTHRES,85,122,105,8
-    CTEXT           "0%",IDC_LABEL_DZ,85,147,105,8
+    CONTROL         "GC Z/L as N64 Z",IDC_ZL_AS_Z,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,9,37,70,10 
+    PUSHBUTTON      "Test adapter pollrate",IDC_TESTPOLL,125,34,75,14
+    GROUPBOX        "Analog settings",IDC_STATIC,9,57,191,117
+    LTEXT           "Analog stick range",IDC_STATIC,19,71,60,8
+    LTEXT           "Trigger threshold",IDC_STATIC,19,96,54,8
+    LTEXT           "C-Stick threshold",IDC_STATIC,20,121,54,8
+    LTEXT           "Deadzone",IDC_STATIC,20,146,34,8
+    CTEXT           "0%",IDC_LABEL_RANGE,85,87,105,8
+    CTEXT           "0%",IDC_LABEL_TRIGTHRES,85,111,105,8
+    CTEXT           "0%",IDC_LABEL_CSTICKTHRES,85,136,105,8
+    CTEXT           "0%",IDC_LABEL_DZ,85,161,109,8
     CONTROL         "Slider1",IDC_SLIDER_RANGE,"msctls_trackbar32",
-                    WS_TABSTOP,85,55,105,17
+                    WS_TABSTOP,85,69,105,17
     CONTROL         "Slider1",IDC_SLIDER_TRIGTHRES,"msctls_trackbar32",
-                    WS_TABSTOP,85,80,105,17
+                    WS_TABSTOP,85,94,105,17
     CONTROL         "Slider1",IDC_SLIDER_CSTICKTHRES,"msctls_trackbar32",
-                    WS_TABSTOP,85,105,105,17
+                    WS_TABSTOP,85,119,105,17
     CONTROL         "Slider1",IDC_SLIDER_DZ,"msctls_trackbar32",
-                    WS_TABSTOP,85,130,105,17
-    GROUPBOX        "GC X/Y function",IDC_STATIC,10,170,125,50
+                    WS_TABSTOP,85,144,105,17
+    GROUPBOX        "GC X/Y function",IDC_STATIC,10,184,125,50
     CONTROL         "Y/X as N64 C-Left/Right",IDC_XY_CB,"Button",
-                    BS_AUTORADIOBUTTON,20,185,94,10
+                    BS_AUTORADIOBUTTON,20,199,94,10
     CONTROL         "Y as N64 L, X as All C-Buttons",IDC_Y_AS_L,"Button",
-                    BS_AUTORADIOBUTTON,20,201,111,10
-    PUSHBUTTON      "Load defaults",IDC_DEFAULTS,145,175,55,14
-    PUSHBUTTON      "Save config",IDC_SAVE,145,195,55,24
+                    BS_AUTORADIOBUTTON,20,215,111,10
+    PUSHBUTTON      "Load defaults",IDC_DEFAULTS,145,189,55,14
+    PUSHBUTTON      "Save config",IDC_SAVE,145,209,55,24
 END
 
 

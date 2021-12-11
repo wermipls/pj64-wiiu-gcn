@@ -98,12 +98,16 @@ EXPORT void CALL GetKeys(int Control, BUTTONS *Keys)
     int rt = cfg.analog_trig ? i->rt > cfg.trig_thres
                              : 0;
 
-    if (cfg.swap_zl) {
-        Keys->Z_TRIG = i->l || lt;
-        Keys->L_TRIG = i->z;
+    if (!cfg.zl_as_z) {
+        if (cfg.swap_zl) {
+            Keys->Z_TRIG = i->l || lt;
+            Keys->L_TRIG = i->z;
+        } else {
+            Keys->Z_TRIG = i->z;
+            Keys->L_TRIG = i->l || lt;
+        } 
     } else {
-        Keys->Z_TRIG = i->z;
-        Keys->L_TRIG = i->l || lt;
+        Keys->Z_TRIG = i->z || i->l || lt;
     }
 
     Keys->R_TRIG = i->r || rt;

@@ -19,12 +19,14 @@ struct config
     int cstick_thres;
     int dz;
     enum XY_mode xy_mode;
+    int zl_as_z;
 };
 
 void config_defaults()
 {
     cfg.swap_zl = 1;
     cfg.analog_trig = 0;
+    cfg.zl_as_z = 0;
     cfg.range = 80;
     cfg.trig_thres = 128;
     cfg.cstick_thres = 64;

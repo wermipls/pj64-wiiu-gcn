@@ -38,6 +38,7 @@ void init_all(HWND diag)
 {
     CheckDlgButton(diag, IDC_SWAPZL, cfg.swap_zl);
     CheckDlgButton(diag, IDC_ANALOGTRIG, cfg.analog_trig);
+    CheckDlgButton(diag, IDC_ZL_AS_Z, cfg.zl_as_z);
 
     int radio = cfg.xy_mode == XY_CBUTTONS ? IDC_XY_CB
                                            : IDC_Y_AS_L;
@@ -73,6 +74,9 @@ INT_PTR CALLBACK dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lParam)
                     break;
                 case IDC_ANALOGTRIG:
                     cfg.analog_trig = IsDlgButtonChecked(diag, IDC_ANALOGTRIG) ? 1 : 0;
+                    break;
+                case IDC_ZL_AS_Z:
+                    cfg.zl_as_z = IsDlgButtonChecked(diag, IDC_ZL_AS_Z) ? 1 : 0;
                     break;
                 case IDC_Y_AS_L:
                     cfg.xy_mode = XY_L_4CBUTTONS;
