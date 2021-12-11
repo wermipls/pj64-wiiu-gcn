@@ -159,7 +159,6 @@ EXPORT void CALL InitiateControllers(HWND hMainWindow, CONTROL Controls[4])
                 Controls[i].Present = TRUE; // assuming its plugged in regardless
                 dlog(LOG_WARN, "Unknown controller %d status: %d", i, gamecube[i].status);
         }
-        Controls[i].Present = gamecube[i].status == GC_PRESENT;
         Controls[i].RawData = FALSE;
         Controls[i].Plugin = PLUGIN_NONE;
     }
