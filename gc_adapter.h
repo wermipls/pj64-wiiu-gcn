@@ -196,13 +196,18 @@ int gc_poll_inputs()
 
         // calibrate centers if just plugged in
         if (!gc_is_present(gc[i].status_old) && gc_is_present(gc[i].status)) {
-            dlog(LOG_INFO, "Controller %d plugged in, calibrating centers", i);
-            gc[i].ax_rest = gc[i].ax;
-            gc[i].ay_rest = gc[i].ay;
-            gc[i].cx_rest = gc[i].cx;
-            gc[i].cy_rest = gc[i].cy;
-            gc[i].lt_rest = gc[i].lt;
-            gc[i].rt_rest = gc[i].rt;
+            // heuristic to avoid a recalib bug happening with oc'd adapter
+            if(gc[i].ax | gc[i].ay | gc[i].cx | gc[i].cy | gc[i].lt | gc[i].rt) {
+                dlog(LOG_INFO, "Controller %d plugged in, calibrating centers", i);
+                gc[i].ax_rest = gc[i].ax;
+                gc[i].ay_rest = gc[i].ay;
+                gc[i].cx_rest = gc[i].cx;
+                gc[i].cy_rest = gc[i].cy;
+                gc[i].lt_rest = gc[i].lt;
+                gc[i].rt_rest = gc[i].rt;
+            } else {
+                gc[i].status = 0; // recalib next time
+            }
         }
 
         // remove offsets
