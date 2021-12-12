@@ -13,23 +13,36 @@ void init_slider(HWND diag, int id, int min, int max, int val)
                 (LPARAM)val);
 }
 
-void slider_updatecfg(HWND slider)
+void print_percent(HWND diag, int id, int val)
+{
+    char buf[5];
+    snprintf(buf, sizeof(buf), "%d%%", val);
+    HWND label = GetDlgItem(diag, id);
+    SetWindowText(label, buf);
+}
+
+void slider_updatecfg(HWND diag, HWND slider)
 {
     LRESULT pos = SendMessage(slider, TBM_GETPOS, 0, 0);
-    
+    HWND label;
+
     switch (GetDlgCtrlID(slider))
     {
         case IDC_SLIDER_RANGE:
             cfg.range = pos;
+            print_percent(diag, IDC_LABEL_RANGE, pos);
             break;
         case IDC_SLIDER_TRIGTHRES:
             cfg.trig_thres = pos;
+            print_percent(diag, IDC_LABEL_TRIGTHRES, pos*100/255);
             break;
         case IDC_SLIDER_CSTICKTHRES:
             cfg.cstick_thres = pos;
+            print_percent(diag, IDC_LABEL_CSTICKTHRES, pos*100/127);
             break;
         case IDC_SLIDER_DZ:
             cfg.dz = pos;
+            print_percent(diag, IDC_LABEL_DZ, pos);
             break;
     }
 }
@@ -48,12 +61,11 @@ void init_all(HWND diag)
     init_slider(diag, IDC_SLIDER_TRIGTHRES, 0, 255, cfg.trig_thres);
     init_slider(diag, IDC_SLIDER_CSTICKTHRES, 0, 127, cfg.cstick_thres);
     init_slider(diag, IDC_SLIDER_DZ, 0, 100, cfg.dz);
-    // set those to blank for now because
-    // converting to percentage is not implemented
-    SetWindowText(GetDlgItem(diag, IDC_LABEL_RANGE), "");
-    SetWindowText(GetDlgItem(diag, IDC_LABEL_TRIGTHRES), "");
-    SetWindowText(GetDlgItem(diag, IDC_LABEL_CSTICKTHRES), "");
-    SetWindowText(GetDlgItem(diag, IDC_LABEL_DZ), "");
+
+    print_percent(diag, IDC_LABEL_RANGE, cfg.range);
+    print_percent(diag, IDC_LABEL_TRIGTHRES, cfg.trig_thres*100/255);
+    print_percent(diag, IDC_LABEL_CSTICKTHRES, cfg.cstick_thres*100/127);
+    print_percent(diag, IDC_LABEL_DZ, cfg.dz);
 }
 
 INT_PTR CALLBACK dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -97,9 +109,7 @@ INT_PTR CALLBACK dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lParam)
                     break;
             }
         case WM_HSCROLL:
-            if (LOWORD(wParam) == TB_ENDTRACK) {
-                slider_updatecfg((HWND)lParam);
-            }
+            slider_updatecfg(diag, (HWND)lParam);
         default:
             return FALSE;
     }

@@ -46,7 +46,7 @@ BEGIN
     CTEXT           "0%",IDC_LABEL_RANGE,85,87,105,8
     CTEXT           "0%",IDC_LABEL_TRIGTHRES,85,111,105,8
     CTEXT           "0%",IDC_LABEL_CSTICKTHRES,85,136,105,8
-    CTEXT           "0%",IDC_LABEL_DZ,85,161,109,8
+    CTEXT           "0%",IDC_LABEL_DZ,85,161,105,8
     CONTROL         "Slider1",IDC_SLIDER_RANGE,"msctls_trackbar32",
                     WS_TABSTOP,85,69,105,17
     CONTROL         "Slider1",IDC_SLIDER_TRIGTHRES,"msctls_trackbar32",
