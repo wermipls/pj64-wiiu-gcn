@@ -284,21 +284,17 @@ int gc_is_async()
     return is_async;
 }
 
-void gc_test_pollrate(HWND parent)
+float gc_test_pollrate()
 {
-    if (!is_async) {
-        MessageBox(parent, 
-                   "Async polling is required.\n\n"
-                   "Enable it, then restart the emulator.",
-                   "sowwie UwU", MB_OK);
-        return;
-    }
+    if (!is_async || !initialized)
+        return -1;
+
     poll_count = 0;
     
     struct timeval old;
     gettimeofday(&old, NULL);
     
-    Sleep(2000);
+    Sleep(1000);
 
     struct timeval new;
     gettimeofday(&new, NULL);
@@ -309,11 +305,5 @@ void gc_test_pollrate(HWND parent)
 
     float delta_s = delta.tv_sec + (float)delta.tv_usec / 1000000;
     
-    float result = poll_count / delta_s;
-
-    char buf[128];
-    snprintf(buf, sizeof(buf), 
-             "Measured pollrate: %.1f Hz",
-             result);
-    MessageBox(parent, buf, "Mucho texto", MB_OK);
+    return poll_count / delta_s;
 }

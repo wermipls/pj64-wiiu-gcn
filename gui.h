@@ -57,6 +57,24 @@ void init_all(HWND diag)
     SetWindowText(GetDlgItem(diag, IDC_LABEL_DZ), "");
 }
 
+void mb_pollrate(HWND parent)
+{
+    float result = gc_test_pollrate();
+
+    if (result < 0) {
+        MessageBox(parent, 
+                   "Failed to test the pollrate.\n\n"
+                   "Enable async polling, then restart the emulator.",
+                   "sowwie UwU", MB_ICONERROR | MB_OK);
+    } else {
+            char buf[128];
+        snprintf(buf, sizeof(buf), 
+                 "Measured pollrate: %.1f Hz",
+                 result);
+        MessageBox(parent, buf, "Mucho texto", MB_OK);
+    }
+}
+
 INT_PTR CALLBACK dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     switch (msg)
@@ -89,7 +107,7 @@ INT_PTR CALLBACK dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lParam)
                     cfg.xy_mode = XY_CBUTTONS;
                     break;
                 case IDC_TESTPOLL:
-                    gc_test_pollrate(diag);
+                    mb_pollrate(diag);
                     break;
                 case IDC_DEFAULTS:
                     config_defaults();
