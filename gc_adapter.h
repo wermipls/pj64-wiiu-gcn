@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <synchapi.h>
 #include <stdatomic.h>
+#include <time.h>
 #include "log.h"
 
 unsigned char endpoint_in = 0x81;
@@ -14,6 +15,10 @@ static atomic_int is_async = 0;
 HANDLE poll_thread;
 HANDLE terminate_event;
 CRITICAL_SECTION gc_critical;
+
+HANDLE polltest_start;
+HANDLE polltest_end;
+atomic_int poll_count = 0;
 
 #define GC_STATUS_PRESENT 0x10
 
@@ -221,6 +226,7 @@ DWORD WINAPI gc_polling_thread(LPVOID param)
 {
     while (WaitForSingleObject(terminate_event, 0)) {
         gc_poll_inputs();
+        ++poll_count;
     }
 }
 
@@ -276,4 +282,38 @@ int gc_get_all_inputs(gc_inputs inputs[4])
 int gc_is_async()
 {
     return is_async;
+}
+
+void gc_test_pollrate(HWND parent)
+{
+    if (!is_async) {
+        MessageBox(parent, 
+                   "Async polling is required.\n\n"
+                   "Enable it, then restart the emulator.",
+                   "sowwie UwU", MB_OK);
+        return;
+    }
+    poll_count = 0;
+    
+    struct timeval old;
+    gettimeofday(&old, NULL);
+    
+    Sleep(2000);
+
+    struct timeval new;
+    gettimeofday(&new, NULL);
+
+    struct timeval delta;
+    delta.tv_sec = new.tv_sec - old.tv_sec;
+    delta.tv_usec = new.tv_usec - old.tv_usec;
+
+    float delta_s = delta.tv_sec + (float)delta.tv_usec / 1000000;
+    
+    float result = poll_count / delta_s;
+
+    char buf[128];
+    snprintf(buf, sizeof(buf), 
+             "Measured pollrate: %.1f Hz",
+             result);
+    MessageBox(parent, buf, "Mucho texto", MB_OK);
 }

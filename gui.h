@@ -89,7 +89,7 @@ INT_PTR CALLBACK dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lParam)
                     cfg.xy_mode = XY_CBUTTONS;
                     break;
                 case IDC_TESTPOLL:
-                    MessageBox(diag, "Not implemented yet!", "sowwie UwU", MB_OK);
+                    gc_test_pollrate(diag);
                     break;
                 case IDC_DEFAULTS:
                     config_defaults();
