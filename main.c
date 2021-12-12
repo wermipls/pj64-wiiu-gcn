@@ -8,7 +8,7 @@
 #include <Windows.h>
 #include <Shlwapi.h>
 #include "zilmar_controller_1.0.h"
-#include "adapter.h"
+#include "gc_adapter.h"
 #include "config.h"
 #include "gui.h"
 #include "util.h"

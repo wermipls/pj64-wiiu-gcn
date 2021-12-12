@@ -119,10 +119,10 @@ void gc_deinit()
 
 int gc_is_present(int status)
 {
-    return status &= GC_STATUS_PRESENT;
+    return status & GC_STATUS_PRESENT;
 }
 
-int gc_get_inputs(gc_inputs gc[])
+int gc_get_inputs(gc_inputs gc[4])
 {
     if (!initialized) return -1;
 
