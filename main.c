@@ -83,7 +83,7 @@ EXPORT void CALL GetKeys(int Control, BUTTONS *Keys)
     gc_inputs *i = &gamecube[Control];
     Keys->Value = 0;
 
-    if (i->status == GC_NOT_AVAILABLE) {
+    if (!gc_is_present(i->status)) {
         return;
     }
 
@@ -140,27 +140,42 @@ EXPORT void CALL InitiateControllers(HWND hMainWindow, CONTROL Controls[4])
 {
     dlog(LOG_INFO, "InitiateControllers()");
     gc_init();
-    int err = gc_get_inputs(gamecube);
-    if (err)
-        return;
+
+    // done in a loop as a workaround for incorrect status being reported
+    // when trying to use the adapter directly after it's been plugged in.
+    // i < 2 works for my official adapter, but i've put in i < 10 to be safe
+    // (which should stall for only 80ms with the default 125hz pollrate)
+    for (int i = 0; i < 10; ++i) { 
+        int err = gc_get_inputs(gamecube);
+        if (err)
+            return;
+    }
+
+    int concount = 0;
 
     for (int i = 0; i < 4; ++i) {
-        switch (gamecube[i].status)
-        {
-            case GC_PRESENT:
-                Controls[i].Present = TRUE;
-                dlog(LOG_INFO, "Controller %d present", i);
-                break;
-            case GC_NOT_AVAILABLE:
-                Controls[i].Present = FALSE;
-                dlog(LOG_INFO, "Controller %d not available", i);
-                break;
-            default:
-                Controls[i].Present = TRUE; // assuming its plugged in regardless
-                dlog(LOG_WARN, "Unknown controller %d status: %d", i, gamecube[i].status);
+        int status = gamecube[i].status;
+
+        if (gc_is_present(status)) {
+            Controls[i].Present = TRUE;
+            dlog(LOG_INFO, "Controller %d present, status 0x%X", i, status);
+            ++concount;
+        } else {
+            Controls[i].Present = FALSE;
+            dlog(LOG_INFO, "Controller %d not available, status 0x%X", i, status);
         }
+
         Controls[i].RawData = FALSE;
         Controls[i].Plugin = PLUGIN_NONE;
+    }
+
+    if (concount == 0) {
+        MessageBox(
+            hMainWindow, 
+            "No controllers detected.\n\n \
+            Please plug in a controller, then restart the emulator.",
+            "Info", MB_OK
+        );
     }
 }
 

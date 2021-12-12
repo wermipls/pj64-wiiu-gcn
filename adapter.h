@@ -8,10 +8,7 @@ unsigned char endpoint_out = 0x02;
 libusb_device_handle *device;
 int initialized = 0;
 
-enum gc_status {
-    GC_NOT_AVAILABLE = 0x00,
-    GC_PRESENT = 0x10,
-};
+#define GC_STATUS_PRESENT 0x10
 
 typedef struct gc_inputs {
     unsigned char status_old;
@@ -134,6 +131,11 @@ void gc_deinit()
     initialized = 0;
 }
 
+int gc_is_present(int status)
+{
+    return status &= GC_STATUS_PRESENT;
+}
+
 int gc_get_inputs(gc_inputs gc[])
 {
     if (!initialized) return -1;
@@ -168,7 +170,7 @@ int gc_get_inputs(gc_inputs gc[])
         gc[i].rt     = readbuf[offset+9];
 
         // calibrate centers if just plugged in
-        if (gc[i].status_old == GC_NOT_AVAILABLE && gc[i].status == GC_PRESENT) {
+        if (!gc_is_present(gc[i].status_old) && gc_is_present(gc[i].status)) {
             dlog(LOG_INFO, "Controller %d plugged in, calibrating centers", i);
             gc[i].ax_rest = gc[i].ax;
             gc[i].ay_rest = gc[i].ay;
