@@ -33,14 +33,14 @@ void config_defaults()
     cfg.cstick_thres = 64;
     cfg.dz = 0;
     cfg.xy_mode = XY_CBUTTONS;
-    cfg.async = 0;
+    cfg.async = 1;
 }
 
 void config_load()
 {
+    config_defaults();
+
     FILE *f = fopen(configpath, "rb");
-    if (!f)
-        config_defaults();
 
     fread(&cfg, sizeof(cfg), 1, f);
 
