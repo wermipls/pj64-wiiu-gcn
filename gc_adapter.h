@@ -1,5 +1,6 @@
 #include <libusb-1.0/libusb.h>
 #include <stdio.h>
+#include <synchapi.h>
 #include "log.h"
 
 unsigned char endpoint_in = 0x81;
@@ -8,6 +9,8 @@ unsigned char endpoint_out = 0x02;
 libusb_device_handle *device;
 int initialized = 0;
 static int is_async = 0;
+
+HANDLE poll_thread;
 
 #define GC_STATUS_PRESENT 0x10
 
@@ -53,10 +56,15 @@ typedef struct gc_inputs {
 
 static gc_inputs gc[4];
 
-void gc_init()
+DWORD WINAPI gc_polling_thread(LPVOID param);
+
+/* attempts to initialize the adapter.
+ * if async_mode is non-zero, a polling thread will be started */
+void gc_init(int async_mode)
 {
     dlog(LOG_INFO, "gc_init()");
     if (initialized) return;
+    dlog(LOG_INFO, "Attempting to initialize the adapter");
 
     int err;
 
@@ -101,6 +109,15 @@ void gc_init()
         dlog(LOG_ERR, "Failed in transfer, %s", libusb_error_name(err));
     }
 
+    if (async_mode) {
+        // start a thread
+        dlog(LOG_INFO, "Starting a polling thread");
+        poll_thread = CreateThread(NULL, 0, gc_polling_thread, NULL, 0, NULL); 
+        is_async = 1;
+    } else {
+        is_async = 0;
+    }
+
     initialized = 1;
 }
 
@@ -108,6 +125,10 @@ void gc_deinit()
 {
     dlog(LOG_INFO, "gc_deinit()");
     if (!initialized) return;
+
+    //if (is_async) {
+    //    dlog(LOG_INFO, "Terminating the polling thread");
+    //}
 
     if (device) {
         dlog(LOG_INFO, "Closing the adapter");
@@ -127,7 +148,7 @@ int gc_is_present(int status)
 
 /* polls the adapter and fills out the internal gc_inputs array
  * returns 0 on success */
-static int gc_poll_inputs()
+int gc_poll_inputs()
 {
     if (!initialized) return -1;
 
@@ -186,15 +207,20 @@ static int gc_poll_inputs()
     return 0;
 }
 
+DWORD WINAPI gc_polling_thread(LPVOID param)
+{
+    for (;;) {
+        gc_poll_inputs();
+    }
+}
+
 /* fills out a gc_inputs struct with the inputs from a specified controller.
  * returns 0 on success */
 int gc_get_inputs(int index, gc_inputs *inputs)
 {
     if (!initialized) return -1;
 
-    if (is_async) {
-        return -2; // not implemented!
-    } else {
+    if (!is_async) {
         // HACK: get the inputs only on p1 request to avoid 
         // needlessly waiting for 4 reports and stalling the emulator.
         int err = 0;
@@ -202,8 +228,9 @@ int gc_get_inputs(int index, gc_inputs *inputs)
             err = gc_poll_inputs();
         if (err)
             return -3;
-        *inputs = gc[index];
     }
+
+    *inputs = gc[index];
 
     return 0;
 }
@@ -214,17 +241,21 @@ int gc_get_all_inputs(gc_inputs inputs[4])
 {
     if (!initialized) return -1;
 
-    if (is_async) {
-        return -2; // not implemented!
-    } else {
+    if (!is_async) {
         int err = gc_poll_inputs();
         if (err)
             return -3;
-        inputs[0] = gc[0];
-        inputs[1] = gc[1];
-        inputs[2] = gc[2];
-        inputs[3] = gc[3];
     }
 
+    inputs[0] = gc[0];
+    inputs[1] = gc[1];
+    inputs[2] = gc[2];
+    inputs[3] = gc[3];
+
     return 0;
+}
+
+int gc_is_async()
+{
+    return is_async;
 }

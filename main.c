@@ -25,6 +25,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
         config_load();
         break;
     case DLL_PROCESS_DETACH:
+        TerminateThread(poll_thread, 0);
         log_close();
         break;
     }
@@ -133,18 +134,23 @@ EXPORT void CALL GetKeys(int Control, BUTTONS *Keys)
 EXPORT void CALL InitiateControllers(HWND hMainWindow, CONTROL Controls[4])
 {
     dlog(LOG_INFO, "InitiateControllers()");
-    gc_init();
+    gc_init(1);
 
     gc_inputs gc[4];
 
-    // done in a loop as a workaround for incorrect status being reported
+    // workaround for incorrect status being reported
     // when trying to use the adapter directly after it's been plugged in.
     // i < 2 works for my official adapter, but i've put in i < 10 to be safe
     // (which should stall for only 80ms with the default 125hz pollrate)
-    for (int i = 0; i < 10; ++i) { 
+    if (!gc_is_async()) { 
+        for (int i = 0; i < 10; ++i) { 
+            int err = gc_get_all_inputs(gc);
+            if (err) return;
+        }
+    } else {
+        Sleep(80);
         int err = gc_get_all_inputs(gc);
-        if (err)
-            return;
+        if (err) return;
     }
 
     int concount = 0;
@@ -184,5 +190,5 @@ EXPORT void CALL RomClosed(void)
 
 EXPORT void CALL RomOpen(void)
 {
-    gc_init();
+    gc_init(1);
 }
