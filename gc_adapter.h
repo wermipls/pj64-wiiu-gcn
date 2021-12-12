@@ -7,6 +7,7 @@ unsigned char endpoint_out = 0x02;
 
 libusb_device_handle *device;
 int initialized = 0;
+static int is_async = 0;
 
 #define GC_STATUS_PRESENT 0x10
 
@@ -49,6 +50,8 @@ typedef struct gc_inputs {
     unsigned char rt_rest;
 
 } gc_inputs;
+
+static gc_inputs gc[4];
 
 void gc_init()
 {
@@ -122,7 +125,9 @@ int gc_is_present(int status)
     return status & GC_STATUS_PRESENT;
 }
 
-int gc_get_inputs(gc_inputs gc[4])
+/* polls the adapter and fills out the internal gc_inputs array
+ * returns 0 on success */
+static int gc_poll_inputs()
 {
     if (!initialized) return -1;
 
@@ -176,6 +181,49 @@ int gc_get_inputs(gc_inputs gc[4])
         // this is certainly not the right way to do it
         //gc[i].lt -= gc[i].lt_rest;
         //gc[i].rt -= gc[i].rt_rest;
+    }
+
+    return 0;
+}
+
+/* fills out a gc_inputs struct with the inputs from a specified controller.
+ * returns 0 on success */
+int gc_get_inputs(int index, gc_inputs *inputs)
+{
+    if (!initialized) return -1;
+
+    if (is_async) {
+        return -2; // not implemented!
+    } else {
+        // HACK: get the inputs only on p1 request to avoid 
+        // needlessly waiting for 4 reports and stalling the emulator.
+        int err = 0;
+        if (index == 0)
+            err = gc_poll_inputs();
+        if (err)
+            return -3;
+        *inputs = gc[index];
+    }
+
+    return 0;
+}
+
+/* fills out a gc_inputs array with the inputs from a specified controller.
+ * returns 0 on success */
+int gc_get_all_inputs(gc_inputs inputs[4])
+{
+    if (!initialized) return -1;
+
+    if (is_async) {
+        return -2; // not implemented!
+    } else {
+        int err = gc_poll_inputs();
+        if (err)
+            return -3;
+        inputs[0] = gc[0];
+        inputs[1] = gc[1];
+        inputs[2] = gc[2];
+        inputs[3] = gc[3];
     }
 
     return 0;
