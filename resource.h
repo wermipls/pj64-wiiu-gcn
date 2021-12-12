@@ -21,6 +21,7 @@
 #define IDC_LABEL_DZ                    1015
 #define IDC_DEFAULTS                    1016
 #define IDC_SAVE                        1017
+#define IDC_ASYNC                       1018
 
 // Next default values for new objects
 // 

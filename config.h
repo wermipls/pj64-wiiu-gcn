@@ -20,6 +20,7 @@ struct config
     int dz;
     enum XY_mode xy_mode;
     int zl_as_z;
+    int async;
 };
 
 void config_defaults()
@@ -32,6 +33,7 @@ void config_defaults()
     cfg.cstick_thres = 64;
     cfg.dz = 0;
     cfg.xy_mode = XY_CBUTTONS;
+    cfg.async = 0;
 }
 
 void config_load()

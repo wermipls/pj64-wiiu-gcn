@@ -52,6 +52,7 @@ void init_all(HWND diag)
     CheckDlgButton(diag, IDC_SWAPZL, cfg.swap_zl);
     CheckDlgButton(diag, IDC_ANALOGTRIG, cfg.analog_trig);
     CheckDlgButton(diag, IDC_ZL_AS_Z, cfg.zl_as_z);
+    CheckDlgButton(diag, IDC_ASYNC, cfg.async);
 
     int radio = cfg.xy_mode == XY_CBUTTONS ? IDC_XY_CB
                                            : IDC_Y_AS_L;
@@ -66,6 +67,24 @@ void init_all(HWND diag)
     print_percent(diag, IDC_LABEL_TRIGTHRES, cfg.trig_thres*100/255);
     print_percent(diag, IDC_LABEL_CSTICKTHRES, cfg.cstick_thres*100/127);
     print_percent(diag, IDC_LABEL_DZ, cfg.dz);
+}
+
+void mb_pollrate(HWND parent)
+{
+    float result = gc_test_pollrate();
+
+    if (result < 0) {
+        MessageBox(parent, 
+                   "Failed to test the pollrate.\n\n"
+                   "Enable async polling, then restart the emulator.",
+                   "sowwie UwU", MB_ICONERROR | MB_OK);
+    } else {
+            char buf[128];
+        snprintf(buf, sizeof(buf), 
+                 "Measured pollrate: %.1f Hz",
+                 result);
+        MessageBox(parent, buf, "Mucho texto", MB_OK);
+    }
 }
 
 INT_PTR CALLBACK dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -90,6 +109,9 @@ INT_PTR CALLBACK dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lParam)
                 case IDC_ZL_AS_Z:
                     cfg.zl_as_z = IsDlgButtonChecked(diag, IDC_ZL_AS_Z) ? 1 : 0;
                     break;
+                case IDC_ASYNC:
+                    cfg.async = IsDlgButtonChecked(diag, IDC_ASYNC) ? 1 : 0;
+                    break;
                 case IDC_Y_AS_L:
                     cfg.xy_mode = XY_L_4CBUTTONS;
                     break;
@@ -97,7 +119,7 @@ INT_PTR CALLBACK dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lParam)
                     cfg.xy_mode = XY_CBUTTONS;
                     break;
                 case IDC_TESTPOLL:
-                    MessageBox(diag, "Not implemented yet!", "sowwie UwU", MB_OK);
+                    mb_pollrate(diag);
                     break;
                 case IDC_DEFAULTS:
                     config_defaults();

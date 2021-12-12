@@ -37,6 +37,8 @@ BEGIN
                     BS_AUTOCHECKBOX | WS_TABSTOP,9,23,63,10
     CONTROL         "GC Z/L as N64 Z",IDC_ZL_AS_Z,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,9,37,70,10 
+    CONTROL         "Async polling",IDC_ASYNC,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,134,9,73,10
     PUSHBUTTON      "Test adapter pollrate",IDC_TESTPOLL,125,34,75,14
     GROUPBOX        "Analog settings",IDC_STATIC,9,57,191,117
     LTEXT           "Analog stick range",IDC_STATIC,19,71,60,8
