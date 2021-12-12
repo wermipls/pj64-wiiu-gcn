@@ -65,6 +65,6 @@ void dlog(enum LogLevel l, char fmt[], ...)
     fprintf(logfile, "[%s] %s%s\n", timestr, prefix, msg);
     
     if(l == LOG_ERR) {
-        MessageBoxA(NULL, msg, "Error", MB_OK | MB_ICONERROR);
+        MessageBoxA(NULL, msg, PLUGIN_NAME " error", MB_OK | MB_ICONERROR);
     }
 }

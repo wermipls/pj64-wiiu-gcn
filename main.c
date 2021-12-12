@@ -172,9 +172,9 @@ EXPORT void CALL InitiateControllers(HWND hMainWindow, CONTROL Controls[4])
     if (concount == 0) {
         MessageBox(
             hMainWindow, 
-            "No controllers detected.\n\n \
-            Please plug in a controller, then restart the emulator.",
-            "Info", MB_OK
+            "No controllers detected.\n\n"
+            "Please plug in a controller, then restart the emulator.",
+            PLUGIN_NAME " info", MB_OK
         );
     }
 }
