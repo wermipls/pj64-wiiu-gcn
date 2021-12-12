@@ -130,8 +130,10 @@ INT_PTR CALLBACK dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lParam)
                     EndDialog(diag, 0);
                     break;
             }
+            break;
         case WM_HSCROLL:
             slider_updatecfg(diag, (HWND)lParam);
+            break;
         default:
             return FALSE;
     }
