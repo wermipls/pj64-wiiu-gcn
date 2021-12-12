@@ -11,6 +11,7 @@ int initialized = 0;
 static int is_async = 0;
 
 HANDLE poll_thread;
+HANDLE terminate_event;
 
 #define GC_STATUS_PRESENT 0x10
 
@@ -126,9 +127,12 @@ void gc_deinit()
     dlog(LOG_INFO, "gc_deinit()");
     if (!initialized) return;
 
-    //if (is_async) {
-    //    dlog(LOG_INFO, "Terminating the polling thread");
-    //}
+    if (is_async) {
+        dlog(LOG_INFO, "Terminating the polling thread");
+        terminate_event = CreateEvent(NULL, FALSE, TRUE, NULL);
+        WaitForSingleObject(poll_thread, INFINITE);
+        dlog(LOG_INFO, "...done");
+    }
 
     if (device) {
         dlog(LOG_INFO, "Closing the adapter");
@@ -209,7 +213,7 @@ int gc_poll_inputs()
 
 DWORD WINAPI gc_polling_thread(LPVOID param)
 {
-    for (;;) {
+    while (WaitForSingleObject(terminate_event, 0)) {
         gc_poll_inputs();
     }
 }

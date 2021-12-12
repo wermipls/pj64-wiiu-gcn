@@ -25,7 +25,6 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
         config_load();
         break;
     case DLL_PROCESS_DETACH:
-        TerminateThread(poll_thread, 0);
         log_close();
         break;
     }
