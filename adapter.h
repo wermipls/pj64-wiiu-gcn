@@ -50,20 +50,6 @@ typedef struct gc_inputs {
 
 } gc_inputs;
 
-static void debug_print_hex(unsigned char data[], int len)
-{
-    char msg[1024];
-    char buf[16];
-
-    msg[0] = '\0';
-    buf[0] = '\0';
-
-    for (int i = 0; i < len; ++i) {
-        snprintf(buf, sizeof(buf), "%02X ", data[i]);
-        strcat(msg, buf);
-    }
-}
-
 void gc_init()
 {
     dlog(LOG_INFO, "gc_init()");
