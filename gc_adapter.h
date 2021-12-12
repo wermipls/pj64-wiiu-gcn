@@ -1,17 +1,19 @@
 #include <libusb-1.0/libusb.h>
 #include <stdio.h>
 #include <synchapi.h>
+#include <stdatomic.h>
 #include "log.h"
 
 unsigned char endpoint_in = 0x81;
 unsigned char endpoint_out = 0x02;
 
 libusb_device_handle *device;
-int initialized = 0;
-static int is_async = 0;
+static atomic_int initialized = 0;
+static atomic_int is_async = 0;
 
 HANDLE poll_thread;
 HANDLE terminate_event;
+CRITICAL_SECTION gc_critical;
 
 #define GC_STATUS_PRESENT 0x10
 
@@ -171,6 +173,8 @@ int gc_poll_inputs()
         dlog(LOG_WARN, "Expected %d bytes response, got %d", 37, transferred);
     }
 
+    EnterCriticalSection(&gc_critical);
+
     for (int i = 0; i < 4; ++i) {
         int offset = i * 9;
         gc[i].status_old = gc[i].status;
@@ -208,6 +212,8 @@ int gc_poll_inputs()
         //gc[i].rt -= gc[i].rt_rest;
     }
 
+    LeaveCriticalSection(&gc_critical);
+
     return 0;
 }
 
@@ -234,7 +240,11 @@ int gc_get_inputs(int index, gc_inputs *inputs)
             return -3;
     }
 
+    EnterCriticalSection(&gc_critical);
+
     *inputs = gc[index];
+
+    LeaveCriticalSection(&gc_critical);
 
     return 0;
 }
@@ -251,10 +261,14 @@ int gc_get_all_inputs(gc_inputs inputs[4])
             return -3;
     }
 
+    EnterCriticalSection(&gc_critical);
+
     inputs[0] = gc[0];
     inputs[1] = gc[1];
     inputs[2] = gc[2];
     inputs[3] = gc[3];
+
+    LeaveCriticalSection(&gc_critical);
 
     return 0;
 }

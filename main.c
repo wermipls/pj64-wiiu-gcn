@@ -23,9 +23,11 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
         hInstance = hinstDLL;
         log_open();
         config_load();
+        InitializeCriticalSection(&gc_critical);
         break;
     case DLL_PROCESS_DETACH:
         log_close();
+        DeleteCriticalSection(&gc_critical);
         break;
     }
     return TRUE;
