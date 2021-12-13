@@ -114,10 +114,12 @@ EXPORT void CALL GetKeys(int Control, BUTTONS *Keys)
     Keys->U_DPAD = i.dup;
     Keys->D_DPAD = i.ddown;
 
-    Keys->L_CBUTTON = i.cx < -cfg.cstick_thres;
-    Keys->R_CBUTTON = i.cx >  cfg.cstick_thres;
-    Keys->D_CBUTTON = i.cy < -cfg.cstick_thres;
-    Keys->U_CBUTTON = i.cy >  cfg.cstick_thres;
+    struct Vec2 cstick = circle_to_square(i.cx, i.cy);
+
+    Keys->L_CBUTTON = cstick.x < -cfg.cstick_thres;
+    Keys->R_CBUTTON = cstick.x >  cfg.cstick_thres;
+    Keys->D_CBUTTON = cstick.y < -cfg.cstick_thres;
+    Keys->U_CBUTTON = cstick.y >  cfg.cstick_thres;
 
     if (cfg.xy_mode == XY_CBUTTONS) {
         Keys->L_CBUTTON |= i.y;
