@@ -2,6 +2,8 @@
 #include <CommCtrl.h>
 #include "resource.h"
 
+static struct config cfg_old;
+
 void init_slider(HWND diag, int id, int min, int max, int val)
 {
     HWND slider = GetDlgItem(diag, id);
@@ -87,11 +89,20 @@ void mb_pollrate(HWND parent)
     }
 }
 
+int restart_required()
+{
+    if (cfg.async != cfg_old.async)
+        return 1;
+
+    return 0;
+}
+
 INT_PTR CALLBACK dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     switch (msg)
     {
         case WM_INITDIALOG:
+            cfg_old = cfg;
             init_all(diag);
             break;
         case WM_CLOSE:
@@ -127,6 +138,12 @@ INT_PTR CALLBACK dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lParam)
                     break;
                 case IDC_SAVE:
                     config_save();
+                    if (restart_required()) {
+                        MessageBox(
+                            diag, 
+                            "Some changes require emulator restart to take effect.", 
+                            "Info", MB_OK | MB_ICONINFORMATION);
+                    }
                     EndDialog(diag, 0);
                     break;
             }
