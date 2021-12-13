@@ -40,14 +40,14 @@ EXPORT void CALL CloseDLL(void)
 
 EXPORT void CALL DllAbout(HWND hParent)
 {
-	MessageBoxA(
+	MessageBox(
         hParent, 
         "Proof of concept Wii U Gamecube adapter plugin\n"
         "Version " PLUGIN_VERSION "\n"
         "Compiled on " __DATE__ "\n\n"
         PLUGIN_REPO,
         "About " PLUGIN_NAMEVER,
-        MB_OK
+        MB_OK | MB_ICONINFORMATION
     );
 }
 
@@ -177,7 +177,7 @@ EXPORT void CALL InitiateControllers(HWND hMainWindow, CONTROL Controls[4])
             hMainWindow, 
             "No controllers detected.\n\n"
             "Please plug in a controller, then restart the emulator.",
-            PLUGIN_NAME " info", MB_OK
+            PLUGIN_NAME " info", MB_OK | MB_ICONINFORMATION
         );
     }
 }

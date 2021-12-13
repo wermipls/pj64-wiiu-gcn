@@ -85,7 +85,7 @@ void mb_pollrate(HWND parent)
         snprintf(buf, sizeof(buf), 
                  "Measured pollrate: %.1f Hz",
                  result);
-        MessageBox(parent, buf, "Mucho texto", MB_OK);
+        MessageBox(parent, buf, "Mucho texto", MB_ICONINFORMATION | MB_OK);
     }
 }
 
