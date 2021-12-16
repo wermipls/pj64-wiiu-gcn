@@ -30,22 +30,22 @@ void slider_updatecfg(HWND diag, HWND slider)
 
     switch (GetDlgCtrlID(slider))
     {
-        case IDC_SLIDER_RANGE:
-            cfg.range = pos;
-            print_percent(diag, IDC_LABEL_RANGE, pos);
-            break;
-        case IDC_SLIDER_TRIGTHRES:
-            cfg.trig_thres = pos;
-            print_percent(diag, IDC_LABEL_TRIGTHRES, pos*100/255);
-            break;
-        case IDC_SLIDER_CSTICKTHRES:
-            cfg.cstick_thres = pos;
-            print_percent(diag, IDC_LABEL_CSTICKTHRES, pos*100/127);
-            break;
-        case IDC_SLIDER_DZ:
-            cfg.dz = pos;
-            print_percent(diag, IDC_LABEL_DZ, pos);
-            break;
+    case IDC_SLIDER_RANGE:
+        cfg.range = pos;
+        print_percent(diag, IDC_LABEL_RANGE, pos);
+        break;
+    case IDC_SLIDER_TRIGTHRES:
+        cfg.trig_thres = pos;
+        print_percent(diag, IDC_LABEL_TRIGTHRES, pos*100/255);
+        break;
+    case IDC_SLIDER_CSTICKTHRES:
+        cfg.cstick_thres = pos;
+        print_percent(diag, IDC_LABEL_CSTICKTHRES, pos*100/127);
+        break;
+    case IDC_SLIDER_DZ:
+        cfg.dz = pos;
+        print_percent(diag, IDC_LABEL_DZ, pos);
+        break;
     }
 }
 
@@ -101,58 +101,58 @@ INT_PTR CALLBACK dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     switch (msg)
     {
-        case WM_INITDIALOG:
-            cfg_old = cfg;
+    case WM_INITDIALOG:
+        cfg_old = cfg;
+        init_all(diag);
+        break;
+    case WM_CLOSE:
+        EndDialog(diag, 0);
+        break;
+    case WM_COMMAND:
+        switch (wParam)
+        {
+        case IDC_SWAPZL:
+            cfg.swap_zl = IsDlgButtonChecked(diag, IDC_SWAPZL) ? 1 : 0;
+            break;
+        case IDC_ANALOGTRIG:
+            cfg.analog_trig = IsDlgButtonChecked(diag, IDC_ANALOGTRIG) ? 1 : 0;
+            break;
+        case IDC_ZL_AS_Z:
+            cfg.zl_as_z = IsDlgButtonChecked(diag, IDC_ZL_AS_Z) ? 1 : 0;
+            break;
+        case IDC_ASYNC:
+            cfg.async = IsDlgButtonChecked(diag, IDC_ASYNC) ? 1 : 0;
+            break;
+        case IDC_Y_AS_L:
+            cfg.xy_mode = XY_L_4CBUTTONS;
+            break;
+        case IDC_XY_CB:
+            cfg.xy_mode = XY_CBUTTONS;
+            break;
+        case IDC_TESTPOLL:
+            mb_pollrate(diag);
+            break;
+        case IDC_DEFAULTS:
+            config_defaults();
             init_all(diag);
             break;
-        case WM_CLOSE:
+        case IDC_SAVE:
+            config_save();
+            if (restart_required()) {
+                MessageBox(
+                    diag, 
+                    "Some changes require emulator restart to take effect.", 
+                    "Info", MB_OK | MB_ICONINFORMATION);
+            }
             EndDialog(diag, 0);
             break;
-        case WM_COMMAND:
-            switch (wParam)
-            {
-                case IDC_SWAPZL:
-                    cfg.swap_zl = IsDlgButtonChecked(diag, IDC_SWAPZL) ? 1 : 0;
-                    break;
-                case IDC_ANALOGTRIG:
-                    cfg.analog_trig = IsDlgButtonChecked(diag, IDC_ANALOGTRIG) ? 1 : 0;
-                    break;
-                case IDC_ZL_AS_Z:
-                    cfg.zl_as_z = IsDlgButtonChecked(diag, IDC_ZL_AS_Z) ? 1 : 0;
-                    break;
-                case IDC_ASYNC:
-                    cfg.async = IsDlgButtonChecked(diag, IDC_ASYNC) ? 1 : 0;
-                    break;
-                case IDC_Y_AS_L:
-                    cfg.xy_mode = XY_L_4CBUTTONS;
-                    break;
-                case IDC_XY_CB:
-                    cfg.xy_mode = XY_CBUTTONS;
-                    break;
-                case IDC_TESTPOLL:
-                    mb_pollrate(diag);
-                    break;
-                case IDC_DEFAULTS:
-                    config_defaults();
-                    init_all(diag);
-                    break;
-                case IDC_SAVE:
-                    config_save();
-                    if (restart_required()) {
-                        MessageBox(
-                            diag, 
-                            "Some changes require emulator restart to take effect.", 
-                            "Info", MB_OK | MB_ICONINFORMATION);
-                    }
-                    EndDialog(diag, 0);
-                    break;
-            }
-            break;
-        case WM_HSCROLL:
-            slider_updatecfg(diag, (HWND)lParam);
-            break;
-        default:
-            return FALSE;
+        }
+        break;
+    case WM_HSCROLL:
+        slider_updatecfg(diag, (HWND)lParam);
+        break;
+    default:
+        return FALSE;
     }
 
     return TRUE;

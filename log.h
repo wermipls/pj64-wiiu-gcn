@@ -41,16 +41,16 @@ void dlog(enum LogLevel l, char fmt[], ...)
 
     switch (l)
     {
-        case LOG_ERR:
-        case LOG_ERR_NO_MSGBOX:
-            prefix = prefix_error;
-            break;
-        case LOG_WARN:
-            prefix = prefix_warn;
-            break;
-        default:
-            prefix = prefix_none;
-            break;
+    case LOG_ERR:
+    case LOG_ERR_NO_MSGBOX:
+        prefix = prefix_error;
+        break;
+    case LOG_WARN:
+        prefix = prefix_warn;
+        break;
+    default:
+        prefix = prefix_none;
+        break;
     }
 
     va_list argv;
