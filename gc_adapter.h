@@ -170,8 +170,12 @@ int gc_poll_inputs()
         device, endpoint_in, readbuf, sizeof(readbuf), &transferred, 16
     );
     if (err) {
-        dlog(LOG_ERR, "Failed in transfer, %s", libusb_error_name(err));
-        gc_deinit();
+        if (err == LIBUSB_ERROR_TIMEOUT) {
+            dlog(LOG_WARN, "Failed in transfer, %s", libusb_error_name(err));
+        } else {
+            dlog(LOG_ERR, "Failed in transfer, %s", libusb_error_name(err));
+            gc_deinit();
+        }
         return -2;
     }
     if (transferred != 37) {
