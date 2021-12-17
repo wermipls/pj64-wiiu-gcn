@@ -38,6 +38,13 @@ EXPORT void CALL CloseDLL(void)
 	gc_deinit();
 }
 
+EXPORT void CALL ControllerCommand(int Control, BYTE *Command)
+{
+    // this func is apparently useless, because ReadController
+    // is called right after and receives the exact same data. lol 
+    return;
+}
+
 EXPORT void CALL DllAbout(HWND hParent)
 {
 	MessageBox(
@@ -170,8 +177,8 @@ EXPORT void CALL InitiateControllers(HWND hMainWindow, CONTROL Controls[4])
             dlog(LOG_INFO, "Controller %d not available, status 0x%X", i, status);
         }
 
-        Controls[i].RawData = FALSE;
-        Controls[i].Plugin = PLUGIN_NONE;
+        Controls[i].RawData = TRUE;
+        Controls[i].Plugin = PLUGIN_RAW;
     }
 
     if (concount == 0) {
@@ -184,7 +191,38 @@ EXPORT void CALL InitiateControllers(HWND hMainWindow, CONTROL Controls[4])
     }
 }
 
-//EXPORT void CALL ReadController(int Control, BYTE *Command);
+EXPORT void CALL ReadController(int Control, BYTE *Command)
+{
+    if (Control == -1)
+        return; // why make a call in the 1st place if there's nothing to do?
+
+    // from what i understand:
+    // Command[0] is command length. in practice, the command is always 1 byte
+    // Command[1] is length of our response in bytes
+    // so the actual data (command then response) only begins at Command[2]
+
+    unsigned char *len_cmd  = &Command[0];
+    unsigned char *len_data = &Command[1];
+    unsigned char *cmd      = &Command[2];
+    unsigned char *data     = &Command[2 + *len_cmd];
+
+    dlog(LOG_INFO, "Controller command: 0x%X", *cmd);
+
+    switch (*cmd)
+    {
+    case 0xFF: // controller info/reset
+    case 0x00: // controller info
+        data[0] = 0x05; // normal n64 controller
+        data[1] = 0x00; // no controller pak
+        break;
+    case 0x01: // controller status
+        GetKeys(Control, (BUTTONS*)data); // HACK: this would optimally be a separate func
+        break;
+    default:
+        *len_data = *len_data | 0b10000000;
+        break; 
+    }
+}
 
 EXPORT void CALL RomClosed(void)
 {
