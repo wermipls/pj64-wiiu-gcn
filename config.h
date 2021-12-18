@@ -8,6 +8,7 @@ enum XY_mode
 {
     XY_CBUTTONS,
     XY_L_4CBUTTONS,
+    XY_NONE,
 };
 
 struct config 

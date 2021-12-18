@@ -124,7 +124,7 @@ EXPORT void CALL GetKeys(int Control, BUTTONS *Keys)
     if (cfg.xy_mode == XY_CBUTTONS) {
         Keys->L_CBUTTON |= i.y;
         Keys->R_CBUTTON |= i.x;
-    } else {
+    } else if (cfg.xy_mode == XY_L_4CBUTTONS) {
         Keys->L_TRIG |= i.y;
 
         Keys->L_CBUTTON |= i.x;

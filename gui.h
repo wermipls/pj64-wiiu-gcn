@@ -56,9 +56,16 @@ void init_all(HWND diag)
     CheckDlgButton(diag, IDC_ZL_AS_Z, cfg.zl_as_z);
     CheckDlgButton(diag, IDC_ASYNC, cfg.async);
 
-    int radio = cfg.xy_mode == XY_CBUTTONS ? IDC_XY_CB
-                                           : IDC_Y_AS_L;
-    CheckRadioButton(diag, IDC_XY_CB, IDC_Y_AS_L, radio);
+    int radio;
+
+    switch (cfg.xy_mode)
+    {
+    case XY_CBUTTONS:    radio = IDC_XY_CB; break;
+    case XY_L_4CBUTTONS: radio = IDC_Y_AS_L; break;
+    case XY_NONE:        radio = IDC_XY_NONE; break;
+    }
+
+    CheckRadioButton(diag, IDC_XY_NONE, IDC_Y_AS_L, radio);
 
     init_slider(diag, IDC_SLIDER_RANGE, 0, 100, cfg.range);
     init_slider(diag, IDC_SLIDER_TRIGTHRES, 0, 255, cfg.trig_thres);
@@ -128,6 +135,9 @@ INT_PTR CALLBACK dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lParam)
             break;
         case IDC_XY_CB:
             cfg.xy_mode = XY_CBUTTONS;
+            break;
+        case IDC_XY_NONE:
+            cfg.xy_mode = XY_NONE;
             break;
         case IDC_TESTPOLL:
             mb_pollrate(diag);
