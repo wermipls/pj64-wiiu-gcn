@@ -63,9 +63,10 @@ void init_all(HWND diag)
     case XY_CBUTTONS:    radio = IDC_XY_CB; break;
     case XY_L_4CBUTTONS: radio = IDC_Y_AS_L; break;
     case XY_NONE:        radio = IDC_XY_NONE; break;
+    case XY_TONYHAWK:    radio = IDC_XY_TONYHAWK; break;
     }
 
-    CheckRadioButton(diag, IDC_XY_NONE, IDC_Y_AS_L, radio);
+    CheckRadioButton(diag, IDC_XY_NONE, IDC_XY_TONYHAWK, radio);
 
     init_slider(diag, IDC_SLIDER_RANGE, 0, 100, cfg.range);
     init_slider(diag, IDC_SLIDER_TRIGTHRES, 0, 255, cfg.trig_thres);
@@ -138,6 +139,9 @@ INT_PTR CALLBACK dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lParam)
             break;
         case IDC_XY_NONE:
             cfg.xy_mode = XY_NONE;
+            break;
+        case IDC_XY_TONYHAWK:
+            cfg.xy_mode = XY_TONYHAWK;
             break;
         case IDC_TESTPOLL:
             mb_pollrate(diag);
