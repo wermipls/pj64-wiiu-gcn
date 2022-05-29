@@ -131,6 +131,11 @@ EXPORT void CALL GetKeys(int Control, BUTTONS *Keys)
         Keys->R_CBUTTON |= i.x;
         Keys->D_CBUTTON |= i.x;
         Keys->U_CBUTTON |= i.x;
+    } else if (cfg.xy_mode == XY_TONYHAWK) {
+        Keys->D_CBUTTON |= i.a;
+        Keys->L_CBUTTON |= i.b;
+        Keys->R_CBUTTON |= i.x;
+        Keys->U_CBUTTON |= i.y;
     }
 }
 

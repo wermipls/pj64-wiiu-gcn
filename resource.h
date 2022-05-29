@@ -13,6 +13,7 @@
 #define IDC_XY_CB                       1007
 #define IDC_Y_AS_L                      1008
 #define IDC_XY_NONE                     1004
+#define IDC_XY_TONYHAWK                 1019
 #define IDC_SLIDER3                     1009
 #define IDC_SLIDER_CSTICKTHRES          1010
 #define IDC_SLIDER_DZ                   1011

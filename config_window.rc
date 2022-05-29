@@ -26,7 +26,7 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_DEFAULT
 // Dialog
 //
 
-IDD_DIALOG1 DIALOG DISCARDABLE  0, 0, 212, 260
+IDD_DIALOG1 DIALOG DISCARDABLE  0, 0, 212, 276
 STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "pj64-wiiu-gcn config"
 FONT 8, "MS Sans Serif"
@@ -57,15 +57,17 @@ BEGIN
                     WS_TABSTOP,85,119,105,17
     CONTROL         "Slider1",IDC_SLIDER_CSTICKTHRES,"msctls_trackbar32",
                     WS_TABSTOP,85,144,105,17
-    GROUPBOX        "GC X/Y function",IDC_STATIC,10,184,125,66
+    GROUPBOX        "GC X/Y function",IDC_STATIC,10,184,125,82
     CONTROL         "Y/X as N64 C-Left/Right",IDC_XY_CB,"Button",
                     BS_AUTORADIOBUTTON,20,199,94,10
     CONTROL         "Y as N64 L, X as All C-Buttons",IDC_Y_AS_L,"Button",
                     BS_AUTORADIOBUTTON,20,215,111,10
     CONTROL         "None",IDC_XY_NONE,"Button",
                     BS_AUTORADIOBUTTON,20,231,111,10
+    CONTROL         "Tony Hawk",IDC_XY_TONYHAWK,"Button",
+                    BS_AUTORADIOBUTTON,20,247,111,10
     PUSHBUTTON      "Load defaults",IDC_DEFAULTS,145,189,55,14
-    PUSHBUTTON      "Save config",IDC_SAVE,145,209,55,40
+    PUSHBUTTON      "Save config",IDC_SAVE,145,209,55,56
 END
 
 
