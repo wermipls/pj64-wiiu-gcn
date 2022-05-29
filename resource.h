@@ -13,7 +13,7 @@
 #define IDC_XY_CB                       1007
 #define IDC_Y_AS_L                      1008
 #define IDC_XY_NONE                     1004
-#define IDC_XY_TONYHAWK                 1019
+#define IDC_XY_TONYHAWK                 1018
 #define IDC_SLIDER3                     1009
 #define IDC_SLIDER_CSTICKTHRES          1010
 #define IDC_SLIDER_DZ                   1011
@@ -23,7 +23,7 @@
 #define IDC_LABEL_DZ                    1015
 #define IDC_DEFAULTS                    1016
 #define IDC_SAVE                        1017
-#define IDC_ASYNC                       1018
+#define IDC_ASYNC                       1019
 
 // Next default values for new objects
 // 
