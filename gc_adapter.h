@@ -20,8 +20,6 @@ HANDLE polltest_start;
 HANDLE polltest_end;
 atomic_int poll_count = 0;
 
-#define GC_STATUS_PRESENT 0x10
-
 typedef struct gc_inputs {
     unsigned char status_old;
     unsigned char status;
@@ -154,7 +152,7 @@ void gc_deinit()
 
 int gc_is_present(int status)
 {
-    return status & GC_STATUS_PRESENT;
+    return status;
 }
 
 /* polls the adapter and fills out the internal gc_inputs array
