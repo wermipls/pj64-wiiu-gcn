@@ -45,16 +45,16 @@ typedef struct gc_inputs {
             int l        : 1;
         };
     };
-    char ax;
-    char ay;
-    char cx;
-    char cy;
+    int ax;
+    int ay;
+    int cx;
+    int cy;
     unsigned char lt;
     unsigned char rt;
-    char ax_rest;
-    char ay_rest;
-    char cx_rest;
-    char cy_rest;
+    int ax_rest;
+    int ay_rest;
+    int cx_rest;
+    int cy_rest;
     unsigned char lt_rest;
     unsigned char rt_rest;
 

@@ -83,8 +83,8 @@ EXPORT void CALL GetKeys(int Control, BUTTONS *Keys)
         return;
     }
 
-    Keys->X_AXIS = deadzone(i.ay, cfg.dz) * cfg.range / 100;
-    Keys->Y_AXIS = deadzone(i.ax, cfg.dz) * cfg.range / 100;
+    Keys->X_AXIS = clamp(deadzone(i.ay, cfg.dz) * cfg.range / 100, -128, 127);
+    Keys->Y_AXIS = clamp(deadzone(i.ax, cfg.dz) * cfg.range / 100, -128, 127);
 
     Keys->A_BUTTON = i.a;
     Keys->B_BUTTON = i.b;
