@@ -9,6 +9,7 @@
 #include "util.h"
 #include "plugin_info.h"
 #include "mapping.h"
+#include "log.h"
 
 HINSTANCE hInstance;
 
