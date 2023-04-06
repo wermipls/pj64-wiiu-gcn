@@ -1,6 +1,10 @@
+#pragma once
+
+#include <stdio.h>
 #include <windows.h>
 #include <CommCtrl.h>
 #include "resource.h"
+#include "log.h"
 
 static struct config cfg_old;
 
@@ -39,7 +43,7 @@ void slider_updatecfg(HWND diag, HWND slider)
         print_percent(diag, IDC_LABEL_TRIGTHRES, pos*100/255);
         break;
     case IDC_SLIDER_CSTICKTHRES:
-        cfg.cstick_thres = pos;
+        cfg.stick_a2d_thres = pos;
         print_percent(diag, IDC_LABEL_CSTICKTHRES, pos*100/127);
         break;
     case IDC_SLIDER_DZ:
@@ -51,31 +55,16 @@ void slider_updatecfg(HWND diag, HWND slider)
 
 void init_all(HWND diag)
 {
-    CheckDlgButton(diag, IDC_SWAPZL, cfg.swap_zl);
-    CheckDlgButton(diag, IDC_ANALOGTRIG, cfg.analog_trig);
-    CheckDlgButton(diag, IDC_ZL_AS_Z, cfg.zl_as_z);
     CheckDlgButton(diag, IDC_ASYNC, cfg.async);
-
-    int radio;
-
-    switch (cfg.xy_mode)
-    {
-    case XY_CBUTTONS:    radio = IDC_XY_CB; break;
-    case XY_L_4CBUTTONS: radio = IDC_Y_AS_L; break;
-    case XY_NONE:        radio = IDC_XY_NONE; break;
-    case XY_TONYHAWK:    radio = IDC_XY_TONYHAWK; break;
-    }
-
-    CheckRadioButton(diag, IDC_XY_NONE, IDC_XY_TONYHAWK, radio);
 
     init_slider(diag, IDC_SLIDER_RANGE, 0, 100, cfg.range);
     init_slider(diag, IDC_SLIDER_TRIGTHRES, 0, 255, cfg.trig_thres);
-    init_slider(diag, IDC_SLIDER_CSTICKTHRES, 0, 127, cfg.cstick_thres);
+    init_slider(diag, IDC_SLIDER_CSTICKTHRES, 0, 127, cfg.stick_a2d_thres);
     init_slider(diag, IDC_SLIDER_DZ, 0, 100, cfg.dz);
 
     print_percent(diag, IDC_LABEL_RANGE, cfg.range);
     print_percent(diag, IDC_LABEL_TRIGTHRES, cfg.trig_thres*100/255);
-    print_percent(diag, IDC_LABEL_CSTICKTHRES, cfg.cstick_thres*100/127);
+    print_percent(diag, IDC_LABEL_CSTICKTHRES, cfg.stick_a2d_thres*100/127);
     print_percent(diag, IDC_LABEL_DZ, cfg.dz);
 }
 
@@ -119,29 +108,8 @@ INT_PTR CALLBACK dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_COMMAND:
         switch (wParam)
         {
-        case IDC_SWAPZL:
-            cfg.swap_zl = IsDlgButtonChecked(diag, IDC_SWAPZL) ? 1 : 0;
-            break;
-        case IDC_ANALOGTRIG:
-            cfg.analog_trig = IsDlgButtonChecked(diag, IDC_ANALOGTRIG) ? 1 : 0;
-            break;
-        case IDC_ZL_AS_Z:
-            cfg.zl_as_z = IsDlgButtonChecked(diag, IDC_ZL_AS_Z) ? 1 : 0;
-            break;
         case IDC_ASYNC:
             cfg.async = IsDlgButtonChecked(diag, IDC_ASYNC) ? 1 : 0;
-            break;
-        case IDC_Y_AS_L:
-            cfg.xy_mode = XY_L_4CBUTTONS;
-            break;
-        case IDC_XY_CB:
-            cfg.xy_mode = XY_CBUTTONS;
-            break;
-        case IDC_XY_NONE:
-            cfg.xy_mode = XY_NONE;
-            break;
-        case IDC_XY_TONYHAWK:
-            cfg.xy_mode = XY_TONYHAWK;
             break;
         case IDC_TESTPOLL:
             mb_pollrate(diag);

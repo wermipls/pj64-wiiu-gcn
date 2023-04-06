@@ -1,10 +1,5 @@
 #define WIN32_LEAN_AND_MEAN
 
-#define PLUGIN_NAME "pj64-wiiu-gcn"
-#define PLUGIN_VERSION "0.2.5"
-#define PLUGIN_NAMEVER PLUGIN_NAME " v" PLUGIN_VERSION
-#define PLUGIN_REPO "https://github.com/wermipls/pj64-wiiu-gcn"
-
 #include <Windows.h>
 #include <Shlwapi.h>
 #include "zilmar_controller_1.0.h"
@@ -12,6 +7,8 @@
 #include "config.h"
 #include "gui.h"
 #include "util.h"
+#include "plugin_info.h"
+#include "mapping.h"
 
 HINSTANCE hInstance;
 
@@ -83,60 +80,31 @@ EXPORT void CALL GetKeys(int Control, BUTTONS *Keys)
         return;
     }
 
-    Keys->X_AXIS = clamp(deadzone(i.ay, cfg.dz) * cfg.range / 100, -128, 127);
-    Keys->Y_AXIS = clamp(deadzone(i.ax, cfg.dz) * cfg.range / 100, -128, 127);
+    process_analog_inputs(&i);
 
-    Keys->A_BUTTON = i.a;
-    Keys->B_BUTTON = i.b;
+    // mappings here LOL
+    Keys->A_BUTTON = get_mapping_state(&i, cfg.mapping[Control].a, 0);
+    Keys->B_BUTTON = get_mapping_state(&i, cfg.mapping[Control].b, 0);
+    Keys->Z_TRIG = get_mapping_state(&i, cfg.mapping[Control].z, 0);
+    Keys->L_TRIG = get_mapping_state(&i, cfg.mapping[Control].l, 0);
+    Keys->R_TRIG = get_mapping_state(&i, cfg.mapping[Control].r, 0);
+    Keys->START_BUTTON = get_mapping_state(&i, cfg.mapping[Control].start, 0);
 
-    int lt = cfg.analog_trig ? i.lt > cfg.trig_thres
-                             : 0;
-    int rt = cfg.analog_trig ? i.rt > cfg.trig_thres
-                             : 0;
+    Keys->L_CBUTTON = get_mapping_state(&i, cfg.mapping[Control].c_left, 0);
+    Keys->R_CBUTTON = get_mapping_state(&i, cfg.mapping[Control].c_right, 0);
+    Keys->D_CBUTTON = get_mapping_state(&i, cfg.mapping[Control].c_down, 0);
+    Keys->U_CBUTTON = get_mapping_state(&i, cfg.mapping[Control].c_up, 0);
 
-    if (!cfg.zl_as_z) {
-        if (cfg.swap_zl) {
-            Keys->Z_TRIG = i.l || lt;
-            Keys->L_TRIG = i.z;
-        } else {
-            Keys->Z_TRIG = i.z;
-            Keys->L_TRIG = i.l || lt;
-        } 
-    } else {
-        Keys->Z_TRIG = i.z || i.l || lt;
-    }
+    Keys->L_DPAD = get_mapping_state(&i, cfg.mapping[Control].c_left, 0);
+    Keys->R_DPAD = get_mapping_state(&i, cfg.mapping[Control].c_right, 0);
+    Keys->D_DPAD = get_mapping_state(&i, cfg.mapping[Control].c_down, 0);
+    Keys->U_DPAD = get_mapping_state(&i, cfg.mapping[Control].c_up, 0);
 
-    Keys->R_TRIG = i.r || rt;
-    Keys->START_BUTTON = i.start;
+    Keys->X_AXIS = get_mapping_state(&i, cfg.mapping[Control].analog_up, 1)
+                 - get_mapping_state(&i, cfg.mapping[Control].analog_down, 1);
 
-    Keys->L_DPAD = i.dleft;
-    Keys->R_DPAD = i.dright;
-    Keys->U_DPAD = i.dup;
-    Keys->D_DPAD = i.ddown;
-
-    struct Vec2 cstick = circle_to_square(i.cx, i.cy);
-
-    Keys->L_CBUTTON = cstick.x < -cfg.cstick_thres;
-    Keys->R_CBUTTON = cstick.x >  cfg.cstick_thres;
-    Keys->D_CBUTTON = cstick.y < -cfg.cstick_thres;
-    Keys->U_CBUTTON = cstick.y >  cfg.cstick_thres;
-
-    if (cfg.xy_mode == XY_CBUTTONS) {
-        Keys->L_CBUTTON |= i.y;
-        Keys->R_CBUTTON |= i.x;
-    } else if (cfg.xy_mode == XY_L_4CBUTTONS) {
-        Keys->L_TRIG |= i.y;
-
-        Keys->L_CBUTTON |= i.x;
-        Keys->R_CBUTTON |= i.x;
-        Keys->D_CBUTTON |= i.x;
-        Keys->U_CBUTTON |= i.x;
-    } else if (cfg.xy_mode == XY_TONYHAWK) {
-        Keys->D_CBUTTON |= i.a;
-        Keys->L_CBUTTON |= i.b;
-        Keys->R_CBUTTON |= i.x;
-        Keys->U_CBUTTON |= i.y;
-    }
+    Keys->Y_AXIS = get_mapping_state(&i, cfg.mapping[Control].analog_right, 1)
+                 - get_mapping_state(&i, cfg.mapping[Control].analog_left, 1);
 }
 
 EXPORT void CALL InitiateControllers(HWND hMainWindow, CONTROL Controls[4])
