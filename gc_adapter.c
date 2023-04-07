@@ -13,6 +13,7 @@ unsigned char endpoint_out = 0x02;
 libusb_device_handle *device;
 static atomic_int initialized = 0;
 static atomic_int is_async = 0;
+static _Atomic enum GCError init_error = GCERR_NOT_INITIALIZED;
 
 HANDLE poll_thread;
 HANDLE terminate_event;
@@ -37,6 +38,7 @@ void gc_init(int async_mode)
     err = libusb_init(NULL);
     if (err) {
         dlog(LOG_ERR, "Failed to initialize libusb");
+        init_error = GCERR_LIBUSB_INIT; 
         return;
     }
 
@@ -44,6 +46,7 @@ void gc_init(int async_mode)
     device = libusb_open_device_with_vid_pid(NULL, 0x057E, 0x0337);
     if (!device) {
         dlog(LOG_ERR, "Failed to open adapter");
+        init_error = GCERR_LIBUSB_OPEN;
         return;
     }
 
@@ -53,6 +56,7 @@ void gc_init(int async_mode)
     err = libusb_claim_interface(device, 0);
     if (err) {
         dlog(LOG_ERR, "Failed to claim interface, %s", libusb_error_name(err));
+        init_error = GCERR_LIBUSB_CLAIM_INTERFACE;
         return;
     }
 
@@ -79,12 +83,22 @@ void gc_init(int async_mode)
         // start a thread
         dlog(LOG_INFO, "Starting a polling thread");
         poll_thread = CreateThread(NULL, 0, gc_polling_thread, NULL, 0, NULL); 
+        if (!poll_thread) {
+            dlog(LOG_ERR, "Failed to create a polling thread");
+            init_error = GCERR_CREATE_THREAD;
+        }
         is_async = 1;
     } else {
         is_async = 0;
     }
 
     initialized = 1;
+    init_error = GCERR_OK;
+}
+
+enum GCError gc_get_init_error()
+{
+    return init_error;
 }
 
 void gc_deinit()
@@ -108,6 +122,7 @@ void gc_deinit()
     libusb_exit(NULL);
 
     initialized = 0;
+    init_error = GCERR_NOT_INITIALIZED;
 }
 
 int gc_is_present(int status)
@@ -157,7 +172,7 @@ int gc_poll_inputs()
         // calibrate centers if just plugged in
         if (!gc_is_present(gc[i].status_old) && gc_is_present(gc[i].status)) {
             // heuristic to avoid a recalib bug happening with oc'd adapter
-            if(gc[i].ax | gc[i].ay | gc[i].cx | gc[i].cy | gc[i].lt | gc[i].rt) {
+            if (gc[i].ax | gc[i].ay | gc[i].cx | gc[i].cy | gc[i].lt | gc[i].rt) {
                 dlog(LOG_INFO, "Controller %d plugged in, calibrating centers", i);
                 gc[i].ax_rest = gc[i].ax;
                 gc[i].ay_rest = gc[i].ay;

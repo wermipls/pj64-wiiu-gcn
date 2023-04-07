@@ -42,13 +42,28 @@ typedef struct gc_inputs {
 
 } gc_inputs;
 
+enum GCError {
+    GCERR_NOT_INITIALIZED = -1,
+    GCERR_OK = 0,
+    GCERR_LIBUSB_INIT,
+    GCERR_LIBUSB_OPEN,
+    GCERR_LIBUSB_CLAIM_INTERFACE,
+    GCERR_CREATE_THREAD,
+};
+
 extern CRITICAL_SECTION gc_critical;
 
 /* attempts to initialize the adapter.
  * if async_mode is non-zero, a polling thread will be started */
 void gc_init(int async_mode);
 
+/* returns the adapter initialization error, or GCERR_OK if initialized */
+enum GCError gc_get_init_error();
+
 void gc_deinit();
+
+/* processes the status byte and returns 0 if controller is not plugged in,
+ * or non-zero if it's plugged in */
 int gc_is_present(int status);
 
 /* polls the adapter and fills out the internal gc_inputs array
@@ -64,4 +79,8 @@ int gc_get_inputs(int index, gc_inputs *inputs);
 int gc_get_all_inputs(gc_inputs inputs[4]);
 
 int gc_is_async();
+
+/* counts polls over span of a second. this is a blocking function.
+ * requires the adapter to be initialized in async mode.
+ * returns a pollrate in Hz on success, or a negative value on error. */
 float gc_test_pollrate();
