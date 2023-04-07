@@ -39,7 +39,7 @@ void config_defaults()
     cfg.dz = 0;
     cfg.async = 1;
 
-    struct ConfigMapping m;
+    struct ConfigMapping m = {0};
 
     m.a.pri = BA_A;
     m.b.pri = BA_B;

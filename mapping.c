@@ -13,13 +13,13 @@ const char *mapping_buttonaxis_labels[] =
     "D-Pad Up",
     "Start",
     "Z",
-    "L Button",
     "R Button",
-    "L Analog",
+    "L Button",
     "R Analog",
+    "L Analog",
     "Left",
     "Right",
-    "Down,"
+    "Down",
     "Up",
     "C-Left",
     "C-Right",
@@ -128,23 +128,28 @@ int get_buttonaxis_state(enum MappingButtonAxis ba, gc_inputs *i, int is_analog)
         if (ba < BA_R_ANALOG) {
             return state * cfg.range;
         }
+        if (ba == BA_R_ANALOG || ba == BA_L_ANALOG) {
+            return state / 2;
+        }
     } else {
         if (ba >= BA_LEFT && ba <= BA_CUP) {
             return state > cfg.stick_a2d_thres;
         }
         if (ba == BA_R_ANALOG || ba == BA_L_ANALOG) {
-            smax(state - cfg.trig_thres, 0);
+            return (state - cfg.trig_thres) > 0;
         }
     }
+
+    return state;
 }
 
 int get_mapping_state(gc_inputs *i, struct Mapping m, int is_analog)
 {
     int p = get_buttonaxis_state(m.pri, i, is_analog);
-    int s = get_buttonaxis_state(m.pri, i, is_analog);
+    int s = get_buttonaxis_state(m.sec, i, is_analog);
 
     if (is_analog) {
-        smin(p, s);
+        smax(p, s);
     } else {
         return p | s;
     }

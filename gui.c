@@ -5,10 +5,114 @@
 #include "log.h"
 #include "config.h"
 #include "gc_adapter.h"
+#include "mapping.h"
 
 static struct config cfg_old;
 static HINSTANCE hinstance;
 static HWND mapping_tab;
+
+int current_controller = 0;
+
+void init_mapping(HWND diag, int id)
+{
+    HWND pri = GetDlgItem(diag, id);
+    HWND sec = GetDlgItem(diag, id + 100);
+
+    for (int i = 0; i < BA_MAX; i++) {
+        const char *str = mapping_get_label(i);
+        SendMessage(pri, CB_ADDSTRING, 0, (LPARAM)str);
+        SendMessage(sec, CB_ADDSTRING, 0, (LPARAM)str);
+    }
+}
+
+enum MappingButtonAxis *baptr_from_idc(int id)
+{
+    struct ConfigMapping *cfgmap = &cfg.mapping[current_controller];
+    struct Mapping *map = 0;
+    int is_sec = 0;
+    if (id >= IDC_MAPPING_SECONDARY_A) {
+        id -= 100;
+        is_sec = 1;
+    }
+
+    switch (id)
+    {
+    case IDC_MAPPING_A: map = &cfgmap->a; break;
+    case IDC_MAPPING_B: map = &cfgmap->b; break;
+    case IDC_MAPPING_Z: map = &cfgmap->z; break;
+    case IDC_MAPPING_L: map = &cfgmap->l; break;
+    case IDC_MAPPING_R: map = &cfgmap->r; break;
+    case IDC_MAPPING_START: map = &cfgmap->start; break;
+
+    case IDC_MAPPING_UP:    map = &cfgmap->analog_up; break;
+    case IDC_MAPPING_DOWN:  map = &cfgmap->analog_down; break;
+    case IDC_MAPPING_LEFT:  map = &cfgmap->analog_left; break;
+    case IDC_MAPPING_RIGHT: map = &cfgmap->analog_right; break;
+
+    case IDC_MAPPING_CUP:    map = &cfgmap->c_up; break;
+    case IDC_MAPPING_CDOWN:  map = &cfgmap->c_down; break;
+    case IDC_MAPPING_CLEFT:  map = &cfgmap->c_left; break;
+    case IDC_MAPPING_CRIGHT: map = &cfgmap->c_right; break;
+
+    case IDC_MAPPING_DUP:    map = &cfgmap->d_up; break;
+    case IDC_MAPPING_DDOWN:  map = &cfgmap->d_down; break;
+    case IDC_MAPPING_DLEFT:  map = &cfgmap->d_left; break;
+    case IDC_MAPPING_DRIGHT: map = &cfgmap->d_right; break;
+    }
+
+    if (map) {
+        return is_sec ? &map->sec : &map->pri;
+    }
+
+    return 0;
+}
+
+void update_mapping_selection(HWND diag, int id, struct Mapping map)
+{
+    HWND pri = GetDlgItem(diag, id);
+    HWND sec = GetDlgItem(diag, id + 100);
+
+    SendMessage(pri, CB_SETCURSEL, map.pri, 0);
+    SendMessage(sec, CB_SETCURSEL, map.sec, 0);
+}
+
+void init_mappings(HWND diag)
+{
+    for (int i = IDC_MAPPING_A; i <= IDC_MAPPING_RIGHT; i++) {
+        init_mapping(diag, i);
+
+        struct Mapping *map = (struct Mapping *)baptr_from_idc(i);
+        update_mapping_selection(diag, i, *map);
+    }
+}
+
+void update_mapping_config(HWND diag, int id) {
+    enum MappingButtonAxis *ba = baptr_from_idc(id);
+    HWND h = GetDlgItem(diag, id);
+
+    *ba = SendMessage(h, CB_GETCURSEL, 0, 0);
+}
+
+INT_PTR CALLBACK mapping_dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    switch (msg)
+    {
+    case WM_INITDIALOG:
+        init_mappings(diag);
+        break;
+    case WM_COMMAND:
+        if (HIWORD(wParam) == CBN_SELCHANGE) {
+            int id = LOWORD(wParam);
+            if (id >= IDC_MAPPING_A && id <= IDC_MAPPING_SECONDARY_RIGHT) {
+                update_mapping_config(diag, id);
+            }
+        } 
+    default:
+        return FALSE;
+    }
+
+    return TRUE;
+}
 
 void init_tabs(HWND diag)
 {
@@ -25,7 +129,7 @@ void init_tabs(HWND diag)
         TabCtrl_InsertItem(tab, i, &item);
     }
     
-    mapping_tab = CreateDialogA(hinstance, MAKEINTRESOURCE(IDD_MAPPING_TAB), diag, NULL);
+    mapping_tab = CreateDialogA(hinstance, MAKEINTRESOURCE(IDD_MAPPING_TAB), diag, mapping_dlgproc);
 
     RECT rc_client, rc_window;
     GetClientRect(tab, &rc_client);
@@ -165,6 +269,7 @@ INT_PTR CALLBACK dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lParam)
             EndDialog(diag, 0);
             break;
         case IDC_CANCEL:
+            cfg = cfg_old;
             EndDialog(diag, 0);
             break;
         }
