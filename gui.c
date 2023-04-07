@@ -7,6 +7,40 @@
 #include "gc_adapter.h"
 
 static struct config cfg_old;
+static HINSTANCE hinstance;
+static HWND mapping_tab;
+
+void init_tabs(HWND diag)
+{
+    HWND tab = GetDlgItem(diag, IDC_TABCONTROL);
+
+    for (int i = 0; i < 4; i++) {
+        char buf[64];
+        snprintf(buf, sizeof(buf), "Controller %d", i+1);
+
+        TCITEM item;
+        item.mask = TCIF_TEXT;
+        item.pszText = buf;
+
+        TabCtrl_InsertItem(tab, i, &item);
+    }
+    
+    mapping_tab = CreateDialogA(hinstance, MAKEINTRESOURCE(IDD_MAPPING_TAB), diag, NULL);
+
+    RECT rc_client, rc_window;
+    GetClientRect(tab, &rc_client);
+    TabCtrl_AdjustRect(tab, FALSE, &rc_client);
+
+    GetWindowRect(tab, &rc_window);
+    ScreenToClient(diag, (LPPOINT)&rc_window);
+
+    OffsetRect(&rc_client, rc_window.left, rc_window.top);
+
+    MoveWindow(mapping_tab,
+        rc_client.left, rc_client.top, rc_client.right-rc_client.left, rc_client.bottom-rc_client.top, FALSE);
+
+    ShowWindow(mapping_tab, SW_SHOW);
+}
 
 void init_slider(HWND diag, int id, int min, int max, int val)
 {
@@ -101,8 +135,10 @@ INT_PTR CALLBACK dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_INITDIALOG:
         cfg_old = cfg;
         init_all(diag);
+        init_tabs(diag);
         break;
     case WM_CLOSE:
+        DestroyWindow(mapping_tab);
         EndDialog(diag, 0);
         break;
     case WM_COMMAND:
@@ -128,6 +164,9 @@ INT_PTR CALLBACK dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lParam)
             }
             EndDialog(diag, 0);
             break;
+        case IDC_CANCEL:
+            EndDialog(diag, 0);
+            break;
         }
         break;
     case WM_HSCROLL:
@@ -142,5 +181,6 @@ INT_PTR CALLBACK dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lParam)
 
 void config_window(HINSTANCE hinst, HWND parent)
 {
+    hinstance = hinst;
     DialogBox(hinst, MAKEINTRESOURCE(IDD_DIALOG1), parent, dlgproc);
 }
