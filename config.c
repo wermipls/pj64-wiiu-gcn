@@ -4,10 +4,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <shlobj.h>
+#include <shlwapi.h>
 
 struct config cfg;
 
-static const char configpath[] = "\%APPDATA\%/" PLUGIN_NAME ".bin";
+static char configpath[MAX_PATH];
+int is_initialized = 0;
+
+void config_init()
+{
+    if (is_initialized) return;
+
+    HRESULT err = SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, configpath);
+    if (err)
+    {
+        dlog(LOG_ERR_NO_MSGBOX, "Failed to initialize config");
+    }
+    PathAppend(configpath, PLUGIN_NAME ".bin");
+
+    is_initialized = 1;
+}
 
 void config_defaults()
 {
@@ -54,6 +71,9 @@ void config_defaults()
 
 void config_load()
 {
+    config_init();
+    if (!is_initialized) return;
+
     config_defaults();
 
     FILE *f = fopen(configpath, "rb");
@@ -92,6 +112,9 @@ void config_load()
 
 void config_save()
 {
+    config_init();
+    if (!is_initialized) return;
+
     FILE *f = fopen(configpath, "wb");
 
     if (f == NULL) {
