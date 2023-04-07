@@ -45,7 +45,7 @@ void gc_init(int async_mode)
     // open first available device
     device = libusb_open_device_with_vid_pid(NULL, 0x057E, 0x0337);
     if (!device) {
-        dlog(LOG_ERR, "Failed to open adapter");
+        dlog(LOG_ERR_NO_MSGBOX, "Failed to open adapter");
         init_error = GCERR_LIBUSB_OPEN;
         return;
     }

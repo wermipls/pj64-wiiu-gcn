@@ -112,6 +112,13 @@ EXPORT void CALL InitiateControllers(HWND hMainWindow, CONTROL Controls[4])
 {
     dlog(LOG_INFO, "InitiateControllers()");
     gc_init(cfg.async);
+    if (gc_get_init_error() == GCERR_LIBUSB_OPEN) {
+        MessageBox(hMainWindow, 
+            "Failed to open the adapter.\n\n"
+            "Make sure the correct driver is installed and the adapter is plugged in.",
+            PLUGIN_NAME " error", MB_ICONERROR | MB_OK);
+        return;
+    }
 
     gc_inputs gc[4];
 
