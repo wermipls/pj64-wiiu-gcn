@@ -96,10 +96,10 @@ EXPORT void CALL GetKeys(int Control, BUTTONS *Keys)
     Keys->D_CBUTTON = get_mapping_state(&i, cfg.mapping[Control].c_down, 0);
     Keys->U_CBUTTON = get_mapping_state(&i, cfg.mapping[Control].c_up, 0);
 
-    Keys->L_DPAD = get_mapping_state(&i, cfg.mapping[Control].c_left, 0);
-    Keys->R_DPAD = get_mapping_state(&i, cfg.mapping[Control].c_right, 0);
-    Keys->D_DPAD = get_mapping_state(&i, cfg.mapping[Control].c_down, 0);
-    Keys->U_DPAD = get_mapping_state(&i, cfg.mapping[Control].c_up, 0);
+    Keys->L_DPAD = get_mapping_state(&i, cfg.mapping[Control].d_left, 0);
+    Keys->R_DPAD = get_mapping_state(&i, cfg.mapping[Control].d_right, 0);
+    Keys->D_DPAD = get_mapping_state(&i, cfg.mapping[Control].d_down, 0);
+    Keys->U_DPAD = get_mapping_state(&i, cfg.mapping[Control].d_up, 0);
 
     Keys->X_AXIS = get_mapping_state(&i, cfg.mapping[Control].analog_up, 1)
                  - get_mapping_state(&i, cfg.mapping[Control].analog_down, 1);
