@@ -31,7 +31,7 @@ void config_defaults()
     char header[4] = "PJGC";
     memcpy(cfg.header, header, sizeof(cfg.header));
 
-    cfg.version = 0x0100;
+    cfg.version = (PLUGIN_VERSION_MAJOR<<8) + PLUGIN_VERSION_MINOR;
 
     cfg.range = 80;
     cfg.trig_thres = 128;
@@ -91,7 +91,7 @@ void config_load()
 
     struct config cfg_new;
 
-    size_t bytes = fread(&cfg_new, sizeof(cfg_new), 1, f);
+    size_t bytes = fread(&cfg_new, 1, sizeof(cfg_new), f);
     if (bytes != sizeof(cfg_new)) {
         dlog(LOG_WARN, "Read %d bytes, config struct is %d",
              bytes, sizeof(cfg_new));
@@ -104,11 +104,16 @@ void config_load()
     }
 
     if (cfg_new.version > cfg.version) {
-        dlog(LOG_ERR_NO_MSGBOX, "Config file version is newer than current (%40x > %40x)",
-             cfg_new.version > cfg.version);
+        dlog(LOG_ERR_NO_MSGBOX, "Config file version is newer than current (%04x > %04x)",
+             cfg_new.version, cfg.version);
         fclose(f); 
         return;
-    }
+    } else if ((cfg_new.version>>8) < (cfg.version>>8)) {
+        dlog(LOG_ERR_NO_MSGBOX, "Config major file version is older than current (%04x < %04x)",
+             cfg_new.version, cfg.version);
+        fclose(f); 
+        return;
+    } 
 
     cfg = cfg_new;
 
