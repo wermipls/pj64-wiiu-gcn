@@ -1,37 +1,69 @@
-//{{NO_DEPENDENCIES}}
-// Microsoft Developer Studio generated include file.
-// Used by ConfigWindow.rc
-//
-#define IDD_FORMVIEW                    101
-#define IDD_DIALOG1                     103
-#define IDC_SWAPZL                      1000
-#define IDC_ANALOGTRIG                  1001
-#define IDC_ZL_AS_Z                     1003
-#define IDC_SLIDER_RANGE                1002
-#define IDC_SLIDER_TRIGTHRES            1005
-#define IDC_TESTPOLL                    1006
-#define IDC_XY_CB                       1007
-#define IDC_Y_AS_L                      1008
-#define IDC_XY_NONE                     1004
-#define IDC_XY_TONYHAWK                 1018
-#define IDC_SLIDER3                     1009
-#define IDC_SLIDER_CSTICKTHRES          1010
-#define IDC_SLIDER_DZ                   1011
-#define IDC_LABEL_RANGE                 1012
-#define IDC_LABEL_TRIGTHRES             1013
-#define IDC_LABEL_CSTICKTHRES           1014
-#define IDC_LABEL_DZ                    1015
-#define IDC_DEFAULTS                    1016
-#define IDC_SAVE                        1017
-#define IDC_ASYNC                       1019
+#define IDD_DIALOG1                     101
 
-// Next default values for new objects
-// 
-#ifdef APSTUDIO_INVOKED
-#ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        104
-#define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1017
-#define _APS_NEXT_SYMED_VALUE           101
-#endif
-#endif
+#define IDC_TESTPOLL                    1001
+#define IDC_ASYNC                       1002
+#define IDC_DEFAULTS                    1003
+#define IDC_SAVE                        1004
+#define IDC_SLIDER_RANGE                1005
+#define IDC_SLIDER_TRIGTHRES            1006
+#define IDC_SLIDER_CSTICKTHRES          1007
+#define IDC_SLIDER_DZ                   1008
+#define IDC_LABEL_RANGE                 1009
+#define IDC_LABEL_TRIGTHRES             1010
+#define IDC_LABEL_CSTICKTHRES           1011
+#define IDC_LABEL_DZ                    1012
+#define IDC_CANCEL                      1013
+#define IDC_SINGLEMAPPING               1014
+#define IDC_SCALEDIAGONALS              1015
+#define IDC_TABCONTROL                  1030
+
+#define IDC_GCSTATUS_ADAPTER            1040
+#define IDC_GCSTATUS_1                  1041
+#define IDC_GCSTATUS_2                  1042
+#define IDC_GCSTATUS_3                  1043
+#define IDC_GCSTATUS_4                  1044
+#define IDC_DRIVER_SETUP                1045
+
+#define IDD_MAPPING_TAB                 102
+
+#define IDC_MAPPING_A                   1100
+#define IDC_MAPPING_B                   1101
+#define IDC_MAPPING_Z                   1102
+#define IDC_MAPPING_L                   1103
+#define IDC_MAPPING_R                   1104
+#define IDC_MAPPING_START               1105
+#define IDC_MAPPING_DUP                 1106
+#define IDC_MAPPING_DDOWN               1107
+#define IDC_MAPPING_DLEFT               1108
+#define IDC_MAPPING_DRIGHT              1109
+#define IDC_MAPPING_CUP                 1110
+#define IDC_MAPPING_CDOWN               1111
+#define IDC_MAPPING_CLEFT               1112
+#define IDC_MAPPING_CRIGHT              1113
+#define IDC_MAPPING_UP                  1114
+#define IDC_MAPPING_DOWN                1115
+#define IDC_MAPPING_LEFT                1116
+#define IDC_MAPPING_RIGHT               1117
+
+#define IDC_MAPPING_SECONDARY_A         1200
+#define IDC_MAPPING_SECONDARY_B         1201
+#define IDC_MAPPING_SECONDARY_Z         1202
+#define IDC_MAPPING_SECONDARY_L         1203
+#define IDC_MAPPING_SECONDARY_R         1204
+#define IDC_MAPPING_SECONDARY_START     1205
+#define IDC_MAPPING_SECONDARY_DUP       1206
+#define IDC_MAPPING_SECONDARY_DDOWN     1207
+#define IDC_MAPPING_SECONDARY_DLEFT     1208
+#define IDC_MAPPING_SECONDARY_DRIGHT    1209
+#define IDC_MAPPING_SECONDARY_CUP       1210
+#define IDC_MAPPING_SECONDARY_CDOWN     1211
+#define IDC_MAPPING_SECONDARY_CLEFT     1212
+#define IDC_MAPPING_SECONDARY_CRIGHT    1213
+#define IDC_MAPPING_SECONDARY_UP        1214
+#define IDC_MAPPING_SECONDARY_DOWN      1215
+#define IDC_MAPPING_SECONDARY_LEFT      1216
+#define IDC_MAPPING_SECONDARY_RIGHT     1217
+
+#define IDC_MAPPING_ENABLED             1300
+#define IDC_MAPPING_FORCEPLUGGED        1301
+#define IDC_MAPPING_ACCESSORY           1302

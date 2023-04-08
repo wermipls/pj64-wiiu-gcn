@@ -1,60 +1,87 @@
-#include <stdio.h>
+#pragma once
 
-struct config cfg;
-
-static const char configpath[] = "./Config/" PLUGIN_NAME ".bin";
-
-enum XY_mode
+enum MappingButtonAxis
 {
-    XY_CBUTTONS,
-    XY_L_4CBUTTONS,
-    XY_NONE,
-    XY_TONYHAWK,
+    BA_NONE,
+    BA_A,
+    BA_B,
+    BA_X,
+    BA_Y,
+    BA_DLEFT,
+    BA_DRIGHT,
+    BA_DDOWN,
+    BA_DUP,
+    BA_START,
+    BA_Z,
+    BA_R_BUTTON,
+    BA_L_BUTTON,
+    BA_R_ANALOG,
+    BA_L_ANALOG,
+    BA_LEFT,
+    BA_RIGHT,
+    BA_DOWN,
+    BA_UP,
+    BA_CLEFT,
+    BA_CRIGHT,
+    BA_CDOWN,
+    BA_CUP,
+    BA_MAX,
+};
+
+struct Mapping 
+{
+    enum MappingButtonAxis pri;
+    enum MappingButtonAxis sec;
+};
+
+enum Accessory
+{
+    ACCESSORY_NONE,
+    ACCESSORY_CPAK,
+};
+
+struct ConfigMapping
+{
+    int enabled;
+    int force_plugged;
+    enum Accessory accessory;
+    struct Mapping a;
+    struct Mapping b;
+    struct Mapping z;
+    struct Mapping l;
+    struct Mapping r;
+    struct Mapping start;
+    struct Mapping d_left;
+    struct Mapping d_right;
+    struct Mapping d_up;
+    struct Mapping d_down;
+    struct Mapping c_left;
+    struct Mapping c_right;
+    struct Mapping c_up;
+    struct Mapping c_down;
+    struct Mapping analog_left;
+    struct Mapping analog_right;
+    struct Mapping analog_up;
+    struct Mapping analog_down;
 };
 
 struct config 
 {
-    int swap_zl;
-    int analog_trig;
+    char header[4];
+    unsigned int version;
     int range;
     int trig_thres;
-    int cstick_thres;
+    int stick_a2d_thres;
     int dz;
-    enum XY_mode xy_mode;
-    int zl_as_z;
     int async;
+    int scale_diagonals;
+    int single_mapping;
+
+    struct ConfigMapping mapping[4];
 };
 
-void config_defaults()
-{
-    cfg.swap_zl = 1;
-    cfg.analog_trig = 0;
-    cfg.zl_as_z = 0;
-    cfg.range = 80;
-    cfg.trig_thres = 128;
-    cfg.cstick_thres = 64;
-    cfg.dz = 0;
-    cfg.xy_mode = XY_CBUTTONS;
-    cfg.async = 1;
-}
+extern struct config cfg;
 
-void config_load()
-{
-    config_defaults();
-
-    FILE *f = fopen(configpath, "rb");
-
-    fread(&cfg, sizeof(cfg), 1, f);
-
-    fclose(f);
-}
-
-void config_save()
-{
-    CreateDirectory("Config", NULL);
-    FILE *f = fopen(configpath, "wb");
-
-    fwrite(&cfg, sizeof(cfg), 1, f);
-
-    fclose(f);
-}
+void config_defaults();
+void config_load();
+void config_save();

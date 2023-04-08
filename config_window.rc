@@ -1,144 +1,165 @@
-//Microsoft Developer Studio generated resource script.
-//
 #include "resource.h"
+#include <windows.h>
 
-#define APSTUDIO_READONLY_SYMBOLS
-/////////////////////////////////////////////////////////////////////////////
-//
-// Generated from the TEXTINCLUDE 2 resource.
-//
-#include "afxres.h"
+#define MAPPINGCTLS(name, id, x, y)                                         \
+    LTEXT       name, -1, (x),     (y)+2, 23, 9                             \
+    COMBOBOX    id,       (x)+25,  (y),   70, 90, CBS_DROPDOWN | WS_TABSTOP \
+    COMBOBOX    id+100,   (x)+100, (y),   70, 90, CBS_DROPDOWN | WS_TABSTOP 
 
-/////////////////////////////////////////////////////////////////////////////
-#undef APSTUDIO_READONLY_SYMBOLS
+#define MAPGRP_OFFSET_X 10
+#define MAPGRP_OFFSET_Y 28
+#define MAPCTL_OFFSET_Y 18
 
-/////////////////////////////////////////////////////////////////////////////
-// Neutral (Default) resources
+#define MAPGRP_H(count) \
+    (MAPGRP_OFFSET_Y + ((count-1)*MAPCTL_OFFSET_Y) + 22)
 
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEUD)
-#ifdef _WIN32
-LANGUAGE LANG_NEUTRAL, SUBLANG_DEFAULT
-#pragma code_page(1252)
-#endif //_WIN32
+#define MAPPINGGROUP(name, x, y, count)                                 \
+    GROUPBOX name,        -1,   0+(x),  0+(y), 190, MAPGRP_H(count)     \
+    CTEXT    "Primary",   -1,  35+(x), 14+(y),  70, 9                   \
+    CTEXT    "Secondary", -1, 110+(x), 14+(y),  70, 9
 
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog
-//
+#define GCSTATUS(id, name, x, y)                                        \
+    LTEXT       name,           -1, x,    y, 28, 10                     \
+    LTEXT       "Not detected", id, x+30, y, 50, 10, WS_DISABLED
 
-IDD_DIALOG1 DIALOG DISCARDABLE  0, 0, 212, 276
-STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+#define PERCENTSLIDER(id_slider, id_label, name, x, y)                      \
+    LTEXT       name, -1,          (x), 14+(y), 60,   8                     \
+    CTEXT       "0%", id_label, 65+(x), 22+(y), 105,  8                     \
+    CONTROL     "", id_slider, "msctls_trackbar32", TBS_HORZ | WS_TABSTOP,  \
+                                65+(x), 10+(y), 105, 12
+
+
+
+101 DIALOGEX 0, 0, 620, 290
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "pj64-wiiu-gcn config"
-FONT 8, "MS Sans Serif"
+LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+FONT 8, "MS Shell Dlg"
 BEGIN
-    CONTROL         "Swap Z/L triggers",IDC_SWAPZL,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,9,9,73,10
-    CONTROL         "Analog triggers",IDC_ANALOGTRIG,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,9,23,63,10
-    CONTROL         "GC Z/L as N64 Z",IDC_ZL_AS_Z,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,9,37,70,10 
-    CONTROL         "Async polling",IDC_ASYNC,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,134,9,73,10
-    PUSHBUTTON      "Test adapter pollrate",IDC_TESTPOLL,125,34,75,14
-    GROUPBOX        "Analog settings",IDC_STATIC,9,57,191,117
-    LTEXT           "Analog stick range",IDC_STATIC,19,71,60,8
-    LTEXT           "Deadzone",IDC_STATIC,19,96,60,8
-    LTEXT           "Trigger threshold",IDC_STATIC,20,121,60,8
-    LTEXT           "C-Stick threshold",IDC_STATIC,20,146,60,8
-    CTEXT           "0%",IDC_LABEL_RANGE,85,87,105,8
-    CTEXT           "0%",IDC_LABEL_DZ,85,111,105,8
-    CTEXT           "0%",IDC_LABEL_TRIGTHRES,85,136,105,8
-    CTEXT           "0%",IDC_LABEL_CSTICKTHRES,85,161,105,8
-    CONTROL         "Slider1",IDC_SLIDER_RANGE,"msctls_trackbar32",
-                    WS_TABSTOP,85,69,105,17
-    CONTROL         "Slider1",IDC_SLIDER_DZ,"msctls_trackbar32",
-                    WS_TABSTOP,85,94,105,17
-    CONTROL         "Slider1",IDC_SLIDER_TRIGTHRES,"msctls_trackbar32",
-                    WS_TABSTOP,85,119,105,17
-    CONTROL         "Slider1",IDC_SLIDER_CSTICKTHRES,"msctls_trackbar32",
-                    WS_TABSTOP,85,144,105,17
-    GROUPBOX        "GC X/Y function",IDC_STATIC,10,184,125,82
-    CONTROL         "Y/X as N64 C-Left/Right",IDC_XY_CB,"Button",
-                    BS_AUTORADIOBUTTON,20,199,94,10
-    CONTROL         "Y as N64 L, X as All C-Buttons",IDC_Y_AS_L,"Button",
-                    BS_AUTORADIOBUTTON,20,215,111,10
-    CONTROL         "Tony Hawk",IDC_XY_TONYHAWK,"Button",
-                    BS_AUTORADIOBUTTON,20,231,111,10
-    CONTROL         "None",IDC_XY_NONE,"Button",
-                    BS_AUTORADIOBUTTON,20,247,111,10
-    PUSHBUTTON      "Load defaults",IDC_DEFAULTS,145,189,55,14
-    PUSHBUTTON      "Save config",IDC_SAVE,145,209,55,56
+    #define SIDE_X 420
+    #define GRP_Y 12
+
+    GROUPBOX "Adapter", -1, SIDE_X, GRP_Y, 190, 90, WS_GROUP
+
+    PUSHBUTTON  "Driver setup...", IDC_DRIVER_SETUP, SIDE_X+10+90, GRP_Y+12, 80, 14
+    GCSTATUS(IDC_GCSTATUS_ADAPTER, "Status", SIDE_X+10, GRP_Y+15)
+
+    GCSTATUS(IDC_GCSTATUS_1, "Port 1", SIDE_X+10,    GRP_Y+20 + 15*1)
+    GCSTATUS(IDC_GCSTATUS_2, "Port 2", SIDE_X+10,    GRP_Y+20 + 15*2)
+    GCSTATUS(IDC_GCSTATUS_3, "Port 3", SIDE_X+10+92, GRP_Y+20 + 15*1)
+    GCSTATUS(IDC_GCSTATUS_4, "Port 4", SIDE_X+10+92, GRP_Y+20 + 15*2)
+
+    CONTROL     "Async polling", IDC_ASYNC, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 
+                SIDE_X+10,    GRP_Y+70, 80, 10 
+    PUSHBUTTON  "Test adapter pollrate", IDC_TESTPOLL, 
+                SIDE_X+10+90, GRP_Y+67, 80, 14
+
+
+    #undef  GRP_Y
+    #define GRP_Y 112
+    GROUPBOX "Analog settings", -1, SIDE_X, GRP_Y, 190, 130, WS_GROUP
+    PERCENTSLIDER(IDC_SLIDER_RANGE,       IDC_LABEL_RANGE,       "Analog stick range",
+                  10+SIDE_X, 5+GRP_Y+24*0)
+    PERCENTSLIDER(IDC_SLIDER_DZ,          IDC_LABEL_DZ,          "Deadzone",
+                  10+SIDE_X, 5+GRP_Y+24*1)
+    PERCENTSLIDER(IDC_SLIDER_TRIGTHRES,   IDC_LABEL_TRIGTHRES,   "Trigger threshold",
+                  10+SIDE_X, 5+GRP_Y+24*2)
+    PERCENTSLIDER(IDC_SLIDER_CSTICKTHRES, IDC_LABEL_CSTICKTHRES, "Stick threshold",
+                  10+SIDE_X, 5+GRP_Y+24*3)
+
+    CONTROL "Scale diagonals for stick->button mapping", IDC_SCALEDIAGONALS, 
+            "Button", BS_AUTOCHECKBOX | WS_TABSTOP, SIDE_X+10, GRP_Y+112, 175, 10
+
+
+    CONTROL "Use Controller 1 mapping for all controllers", IDC_SINGLEMAPPING, 
+            "Button", BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP, SIDE_X+5, 251, 200, 10
+
+    PUSHBUTTON "Load defaults", IDC_DEFAULTS, SIDE_X,     270, 55, 14
+    PUSHBUTTON "Save config",   IDC_SAVE,     SIDE_X+78,  270, 67, 14 
+    PUSHBUTTON "Cancel",        IDC_CANCEL,   SIDE_X+150, 270, 41, 14 
+
+    CONTROL "", IDC_TABCONTROL, "SysTabControl32", WS_TABSTOP, 5, 5, 405, 280
 END
 
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO DISCARDABLE 
+102 DIALOGEX 0, 0, 405, 280
+STYLE DS_SETFONT | DS_CONTROL | WS_CHILD
+CAPTION ""
+LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+FONT 8, "MS Shell Dlg"
 BEGIN
-    IDD_DIALOG1, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 205
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 222
-    END
+    #undef GRP_Y
+
+    #define GRP_X 5
+    #define GRP_Y 5
+    CONTROL "Enabled",          IDC_MAPPING_ENABLED,      "Button", BS_AUTOCHECKBOX | WS_TABSTOP,
+            GRP_X+5, GRP_Y+5, 80, 10 
+    CONTROL "Force plugged in", IDC_MAPPING_FORCEPLUGGED, "Button", BS_AUTOCHECKBOX | WS_TABSTOP,
+            GRP_X+5, GRP_Y+20, 80, 10 
+    
+    COMBOBOX IDC_MAPPING_ACCESSORY, GRP_X+95, GRP_Y+20, 90, 73, CBS_DROPDOWN | WS_TABSTOP
+
+    #undef GRP_X 
+    #undef GRP_Y
+
+    #define GRP_X 5
+    #define GRP_Y (155 - MAPGRP_H(4) - 10)
+    MAPPINGGROUP("C-Buttons",GRP_X,GRP_Y,4)
+
+    #define CUR_X GRP_X + MAPGRP_OFFSET_X
+    #define CUR_Y GRP_Y + MAPGRP_OFFSET_Y
+    MAPPINGCTLS("Up",    IDC_MAPPING_CUP,        CUR_X, CUR_Y + 0*MAPCTL_OFFSET_Y)
+    MAPPINGCTLS("Down",  IDC_MAPPING_CDOWN,      CUR_X, CUR_Y + 1*MAPCTL_OFFSET_Y)
+    MAPPINGCTLS("Left",  IDC_MAPPING_CLEFT,      CUR_X, CUR_Y + 2*MAPCTL_OFFSET_Y)
+    MAPPINGCTLS("Right", IDC_MAPPING_CRIGHT,     CUR_X, CUR_Y + 3*MAPCTL_OFFSET_Y)
+
+    #undef CUR_X 
+    #undef CUR_Y 
+    #undef GRP_X 
+    #undef GRP_Y
+
+    #define GRP_X 5
+    #define GRP_Y 155
+    MAPPINGGROUP("D-Pad",GRP_X,GRP_Y,4)
+
+    #define CUR_X GRP_X + MAPGRP_OFFSET_X
+    #define CUR_Y GRP_Y + MAPGRP_OFFSET_Y
+    MAPPINGCTLS("Up",    IDC_MAPPING_DUP,        CUR_X, CUR_Y + 0*MAPCTL_OFFSET_Y)
+    MAPPINGCTLS("Down",  IDC_MAPPING_DDOWN,      CUR_X, CUR_Y + 1*MAPCTL_OFFSET_Y)
+    MAPPINGCTLS("Left",  IDC_MAPPING_DLEFT,      CUR_X, CUR_Y + 2*MAPCTL_OFFSET_Y)
+    MAPPINGCTLS("Right", IDC_MAPPING_DRIGHT,     CUR_X, CUR_Y + 3*MAPCTL_OFFSET_Y)
+
+    #undef CUR_X 
+    #undef CUR_Y 
+    #undef GRP_X 
+    #undef GRP_Y
+
+    #define GRP_X 205
+    #define GRP_Y 5
+    MAPPINGGROUP("Buttons",GRP_X,GRP_Y,6)
+
+    #define CUR_X GRP_X + MAPGRP_OFFSET_X
+    #define CUR_Y GRP_Y + MAPGRP_OFFSET_Y
+    MAPPINGCTLS("A",    IDC_MAPPING_A,    CUR_X, CUR_Y + 0*MAPCTL_OFFSET_Y)
+    MAPPINGCTLS("B",    IDC_MAPPING_B,    CUR_X, CUR_Y + 1*MAPCTL_OFFSET_Y)
+    MAPPINGCTLS("Z",    IDC_MAPPING_Z,    CUR_X, CUR_Y + 2*MAPCTL_OFFSET_Y)
+    MAPPINGCTLS("L",    IDC_MAPPING_L,    CUR_X, CUR_Y + 3*MAPCTL_OFFSET_Y)
+    MAPPINGCTLS("R",    IDC_MAPPING_R,    CUR_X, CUR_Y + 4*MAPCTL_OFFSET_Y)
+    MAPPINGCTLS("Start",IDC_MAPPING_START,CUR_X, CUR_Y + 5*MAPCTL_OFFSET_Y)
+
+    #undef CUR_X 
+    #undef CUR_Y 
+    #undef GRP_X 
+    #undef GRP_Y
+
+    #define GRP_X 205
+    #define GRP_Y 155
+    MAPPINGGROUP("Analog Stick",GRP_X,GRP_Y,4)
+
+    #define CUR_X GRP_X + MAPGRP_OFFSET_X
+    #define CUR_Y GRP_Y + MAPGRP_OFFSET_Y
+    MAPPINGCTLS("Up",    IDC_MAPPING_UP,        CUR_X, CUR_Y + 0*MAPCTL_OFFSET_Y)
+    MAPPINGCTLS("Down",  IDC_MAPPING_DOWN,      CUR_X, CUR_Y + 1*MAPCTL_OFFSET_Y)
+    MAPPINGCTLS("Left",  IDC_MAPPING_LEFT,      CUR_X, CUR_Y + 2*MAPCTL_OFFSET_Y)
+    MAPPINGCTLS("Right", IDC_MAPPING_RIGHT,     CUR_X, CUR_Y + 3*MAPCTL_OFFSET_Y)
 END
-#endif    // APSTUDIO_INVOKED
-
-#endif    // Neutral (Default) resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-#ifdef _WIN32
-LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
-#pragma code_page(1252)
-#endif //_WIN32
-
-#ifdef APSTUDIO_INVOKED
-/////////////////////////////////////////////////////////////////////////////
-//
-// TEXTINCLUDE
-//
-
-1 TEXTINCLUDE DISCARDABLE 
-BEGIN
-    "resource.h\0"
-END
-
-2 TEXTINCLUDE DISCARDABLE 
-BEGIN
-    "#include ""afxres.h""\r\n"
-    "\0"
-END
-
-3 TEXTINCLUDE DISCARDABLE 
-BEGIN
-    "\r\n"
-    "\0"
-END
-
-#endif    // APSTUDIO_INVOKED
-
-#endif    // English (U.S.) resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-
-#ifndef APSTUDIO_INVOKED
-/////////////////////////////////////////////////////////////////////////////
-//
-// Generated from the TEXTINCLUDE 3 resource.
-//
-
-
-/////////////////////////////////////////////////////////////////////////////
-#endif    // not APSTUDIO_INVOKED
 
