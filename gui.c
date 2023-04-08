@@ -16,7 +16,7 @@ static struct config cfg_old;
 static HINSTANCE hinstance;
 static HWND mapping_tab;
 
-int current_controller = 0;
+int current_tab = 0;
 
 unsigned int gc_status_color[5] = { 
     0,
@@ -40,7 +40,7 @@ void init_mapping(HWND diag, int id)
 
 enum MappingButtonAxis *baptr_from_idc(int id)
 {
-    struct ConfigMapping *cfgmap = &cfg.mapping[current_controller];
+    struct ConfigMapping *cfgmap = &cfg.mapping[current_tab];
     struct Mapping *map = 0;
     int is_sec = 0;
     if (id >= IDC_MAPPING_SECONDARY_A) {
@@ -89,22 +89,41 @@ void update_mapping_selection(HWND diag, int id, struct Mapping map)
     SendMessage(sec, CB_SETCURSEL, map.sec, 0);
 }
 
-void init_mappings(HWND diag)
-{
-    for (int i = IDC_MAPPING_A; i <= IDC_MAPPING_RIGHT; i++) {
-        init_mapping(diag, i);
-
-        struct Mapping *map = (struct Mapping *)baptr_from_idc(i);
-        update_mapping_selection(diag, i, *map);
-    }
-}
-
 void update_mapping_tab(HWND diag)
 {
     for (int i = IDC_MAPPING_A; i <= IDC_MAPPING_RIGHT; i++) {
         struct Mapping *map = (struct Mapping *)baptr_from_idc(i);
         update_mapping_selection(diag, i, *map);
     }
+
+    CheckDlgButton(diag, IDC_MAPPING_ENABLED, 
+                         cfg.mapping[current_tab].enabled);
+    CheckDlgButton(diag, IDC_MAPPING_FORCEPLUGGED, 
+                         cfg.mapping[current_tab].force_plugged);
+
+    HWND accessory = GetDlgItem(diag, IDC_MAPPING_ACCESSORY);
+    int selection = cfg.mapping[current_tab].accessory;
+    SendMessage(accessory, CB_SETCURSEL, selection, 0);
+}
+
+void init_mapping_tab(HWND diag)
+{
+    for (int i = IDC_MAPPING_A; i <= IDC_MAPPING_RIGHT; i++) {
+        init_mapping(diag, i);
+    }
+
+    static const char *accessory_label[] = {
+        "No accessory",
+        "Controller Pak",
+    };
+
+    HWND accessory = GetDlgItem(diag, IDC_MAPPING_ACCESSORY);
+    for (size_t i = 0; i < sizeof(accessory_label)/sizeof(char*); i++) {
+        const char *str = accessory_label[i];
+        SendMessage(accessory, CB_ADDSTRING, 0, (LPARAM)str);
+    }
+
+    update_mapping_tab(diag);
 }
 
 void update_mapping_config(HWND diag, int id) {
@@ -119,16 +138,31 @@ INT_PTR CALLBACK mapping_dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lPar
     switch (msg)
     {
     case WM_INITDIALOG:
-        init_mappings(diag);
+        init_mapping_tab(diag);
         break;
-    case WM_COMMAND:
+    case WM_COMMAND: ;
+        int id = LOWORD(wParam);
+
         if (HIWORD(wParam) == CBN_SELCHANGE) {
-            int id = LOWORD(wParam);
             if (id >= IDC_MAPPING_A && id <= IDC_MAPPING_SECONDARY_RIGHT) {
                 update_mapping_config(diag, id);
                 break;
+            } else if (id == IDC_MAPPING_ACCESSORY) {
+                cfg.mapping[current_tab].accessory = SendMessage((HWND)lParam, CB_GETCURSEL, 0, 0);
+                break;
             }
         }
+
+        switch (id)
+        {
+        case IDC_MAPPING_ENABLED:
+            cfg.mapping[current_tab].enabled = IsDlgButtonChecked(diag, id) ? 1 : 0;
+            return TRUE;
+        case IDC_MAPPING_FORCEPLUGGED:
+            cfg.mapping[current_tab].force_plugged = IsDlgButtonChecked(diag, id) ? 1 : 0;
+            return TRUE;
+        }
+
         return FALSE;
     default:
         return FALSE;
@@ -216,6 +250,8 @@ void slider_updatecfg(HWND diag, HWND slider)
 void init_all(HWND diag)
 {
     CheckDlgButton(diag, IDC_ASYNC, cfg.async);
+    CheckDlgButton(diag, IDC_SCALEDIAGONALS, cfg.scale_diagonals);
+    CheckDlgButton(diag, IDC_SINGLEMAPPING, cfg.single_mapping);
 
     init_slider(diag, IDC_SLIDER_RANGE, 0, 100, cfg.range);
     init_slider(diag, IDC_SLIDER_TRIGTHRES, 0, 255, cfg.trig_thres);
@@ -360,7 +396,16 @@ INT_PTR CALLBACK dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lParam)
         switch (wParam)
         {
         case IDC_ASYNC:
-            cfg.async = IsDlgButtonChecked(diag, IDC_ASYNC) ? 1 : 0;
+            cfg.async = IsDlgButtonChecked(diag, wParam) ? 1 : 0;
+            break;
+        case IDC_SINGLEMAPPING:
+            cfg.single_mapping = IsDlgButtonChecked(diag, wParam) ? 1 : 0;
+            break;
+        case IDC_SCALEDIAGONALS:
+            cfg.scale_diagonals = IsDlgButtonChecked(diag, wParam) ? 1 : 0;
+            break;
+        case IDC_DRIVER_SETUP:
+            ShellExecuteA(0, 0, "https://wermi.neocities.org/emuguide/pj64-wiiu-gcn/#winusb-driver-install", 0, 0, SW_HIDE);
             break;
         case IDC_TESTPOLL:
             mb_pollrate(diag);
@@ -408,7 +453,7 @@ INT_PTR CALLBACK dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lParam)
         LPNMHDR lpnmhdr = (LPNMHDR)lParam; 
         if (lpnmhdr->code == TCN_SELCHANGE) {
             if (lpnmhdr->idFrom == IDC_TABCONTROL) {
-                current_controller = TabCtrl_GetCurSel(lpnmhdr->hwndFrom);
+                current_tab = TabCtrl_GetCurSel(lpnmhdr->hwndFrom);
                 update_mapping_tab(mapping_tab);
                 break;
             }

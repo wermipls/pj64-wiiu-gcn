@@ -34,8 +34,17 @@ struct Mapping
     enum MappingButtonAxis sec;
 };
 
+enum Accessory
+{
+    ACCESSORY_NONE,
+    ACCESSORY_CPAK,
+};
+
 struct ConfigMapping
 {
+    int enabled;
+    int force_plugged;
+    enum Accessory accessory;
     struct Mapping a;
     struct Mapping b;
     struct Mapping z;
@@ -65,6 +74,8 @@ struct config
     int stick_a2d_thres;
     int dz;
     int async;
+    int scale_diagonals;
+    int single_mapping;
 
     struct ConfigMapping mapping[4];
 };

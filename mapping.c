@@ -28,14 +28,26 @@ const char *mapping_buttonaxis_labels[] =
 };
 
 
-void process_analog_inputs(gc_inputs *i)
+void process_inputs_analog(gc_inputs *i)
 {
     i->ax = clamp(deadzone(i->ax, cfg.dz) * cfg.range / 100, -128, 127);
     i->ay = clamp(deadzone(i->ay, cfg.dz) * cfg.range / 100, -128, 127);
 
-    struct Vec2 cstick = circle_to_square(i->cx, i->cy);
-    i->cx = cstick.x;
-    i->cy = cstick.y;
+    i->cx = clamp(deadzone(i->cx, cfg.dz) * cfg.range / 100, -128, 127);
+    i->cy = clamp(deadzone(i->cy, cfg.dz) * cfg.range / 100, -128, 127);
+}
+
+void process_inputs_digital(gc_inputs *i)
+{
+    if (cfg.scale_diagonals) {
+        struct Vec2 cstick = circle_to_square(i->cx, i->cy);
+        i->cx = cstick.x;
+        i->cy = cstick.y;
+
+        struct Vec2 stick = circle_to_square(i->ax, i->ay);
+        i->ax = stick.x;
+        i->ay = stick.y;
+    }
 }
 
 const char *mapping_get_label(enum MappingButtonAxis ba)
@@ -47,8 +59,12 @@ const char *mapping_get_label(enum MappingButtonAxis ba)
     }
 }
 
-int get_buttonaxis_state(enum MappingButtonAxis ba, gc_inputs *i, int is_analog)
+int get_buttonaxis_state(enum MappingButtonAxis ba, gc_inputs *i, gc_inputs *id, int is_analog)
 {
+    if (!is_analog) {
+        i = id;
+    }
+
     int state;
 
     switch (ba)
@@ -126,7 +142,7 @@ int get_buttonaxis_state(enum MappingButtonAxis ba, gc_inputs *i, int is_analog)
 
     if (is_analog) {
         if (ba < BA_R_ANALOG) {
-            return state * cfg.range;
+            return state ? cfg.range : 0;
         }
         if (ba == BA_R_ANALOG || ba == BA_L_ANALOG) {
             return state / 2;
@@ -143,10 +159,10 @@ int get_buttonaxis_state(enum MappingButtonAxis ba, gc_inputs *i, int is_analog)
     return state;
 }
 
-int get_mapping_state(gc_inputs *i, struct Mapping m, int is_analog)
+int get_mapping_state(gc_inputs *i, gc_inputs *id, struct Mapping m, int is_analog)
 {
-    int p = get_buttonaxis_state(m.pri, i, is_analog);
-    int s = get_buttonaxis_state(m.sec, i, is_analog);
+    int p = get_buttonaxis_state(m.pri, i, id, is_analog);
+    int s = get_buttonaxis_state(m.sec, i, id, is_analog);
 
     if (is_analog) {
         return smax(p, s);
