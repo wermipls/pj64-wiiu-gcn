@@ -99,6 +99,14 @@ void init_mappings(HWND diag)
     }
 }
 
+void update_mapping_tab(HWND diag)
+{
+    for (int i = IDC_MAPPING_A; i <= IDC_MAPPING_RIGHT; i++) {
+        struct Mapping *map = (struct Mapping *)baptr_from_idc(i);
+        update_mapping_selection(diag, i, *map);
+    }
+}
+
 void update_mapping_config(HWND diag, int id) {
     enum MappingButtonAxis *ba = baptr_from_idc(id);
     HWND h = GetDlgItem(diag, id);
@@ -118,8 +126,10 @@ INT_PTR CALLBACK mapping_dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lPar
             int id = LOWORD(wParam);
             if (id >= IDC_MAPPING_A && id <= IDC_MAPPING_SECONDARY_RIGHT) {
                 update_mapping_config(diag, id);
+                break;
             }
-        } 
+        }
+        return FALSE;
     default:
         return FALSE;
     }
@@ -181,7 +191,6 @@ void print_percent(HWND diag, int id, int val)
 void slider_updatecfg(HWND diag, HWND slider)
 {
     LRESULT pos = SendMessage(slider, TBM_GETPOS, 0, 0);
-    HWND label;
 
     switch (GetDlgCtrlID(slider))
     {
@@ -359,6 +368,7 @@ INT_PTR CALLBACK dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lParam)
         case IDC_DEFAULTS:
             config_defaults();
             init_all(diag);
+            update_mapping_tab(mapping_tab);
             break;
         case IDC_SAVE:
             config_save();
@@ -393,6 +403,17 @@ INT_PTR CALLBACK dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lParam)
             SetTextColor(hdc, gc_status_color[id-IDC_GCSTATUS_ADAPTER]);
             return (INT_PTR)GetSysColorBrush(COLOR_BTNFACE); 
         }
+        return FALSE;
+    case WM_NOTIFY: ;
+        LPNMHDR lpnmhdr = (LPNMHDR)lParam; 
+        if (lpnmhdr->code == TCN_SELCHANGE) {
+            if (lpnmhdr->idFrom == IDC_TABCONTROL) {
+                current_controller = TabCtrl_GetCurSel(lpnmhdr->hwndFrom);
+                update_mapping_tab(mapping_tab);
+                break;
+            }
+        }
+        return FALSE;
     default:
         return FALSE;
     }

@@ -149,8 +149,8 @@ int get_mapping_state(gc_inputs *i, struct Mapping m, int is_analog)
     int s = get_buttonaxis_state(m.sec, i, is_analog);
 
     if (is_analog) {
-        smax(p, s);
-    } else {
-        return p | s;
+        return smax(p, s);
     }
+
+    return p | s;
 }

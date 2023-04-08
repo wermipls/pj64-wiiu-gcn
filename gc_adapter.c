@@ -215,6 +215,8 @@ DWORD WINAPI gc_polling_thread(LPVOID param)
         gc_poll_inputs();
         ++poll_count;
     }
+
+    return 0;
 }
 
 int gc_get_inputs(int index, gc_inputs *inputs)
