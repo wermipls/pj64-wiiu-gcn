@@ -7,11 +7,24 @@
 #include "gc_adapter.h"
 #include "mapping.h"
 
+#define GC_STATUS_REFRESH_MS 200
+#define GC_STATUS_REFRESH_ID 1000
+#define GC_STATUS_COLOR_OK   RGB(64, 160, 0)
+#define GC_STATUS_COLOR_ERR  RGB(192, 0, 64)
+
 static struct config cfg_old;
 static HINSTANCE hinstance;
 static HWND mapping_tab;
 
 int current_controller = 0;
+
+unsigned int gc_status_color[5] = { 
+    0,
+    GC_STATUS_COLOR_OK,
+    GC_STATUS_COLOR_OK,
+    GC_STATUS_COLOR_OK,
+    GC_STATUS_COLOR_OK
+};
 
 void init_mapping(HWND diag, int id)
 {
@@ -224,6 +237,94 @@ void mb_pollrate(HWND parent)
     }
 }
 
+void refresh_gc_status(HWND diag, int force_refresh)
+{
+    static const char *gc_init_status[] = {
+        "N/A",
+        "Not initialized",
+        "OK",
+        "libusb init fail",
+        "Not detected",
+        "libusb claim fail"
+        "Poll thread error"
+    };
+
+    HWND label = GetDlgItem(diag, IDC_GCSTATUS_ADAPTER);
+
+    static enum GCError gcerr_old = -2; 
+    enum GCError gcerr = gc_get_init_error();
+    const char *status = gc_init_status[gcerr+2];
+
+    if (gcerr_old != gcerr || force_refresh) {
+        SetWindowText(label, status);
+        gcerr_old = gcerr;
+    }
+
+    switch (gcerr)
+    {
+    case GCERR_NOT_INITIALIZED:
+        EnableWindow(label, FALSE);
+        break;
+    case GCERR_LIBUSB_INIT:
+    case GCERR_LIBUSB_OPEN:
+    case GCERR_LIBUSB_CLAIM_INTERFACE:
+    case GCERR_CREATE_THREAD:
+        EnableWindow(label, TRUE);
+        gc_status_color[0] = GC_STATUS_COLOR_ERR;
+        break;
+    case GCERR_OK:
+        EnableWindow(label, TRUE);
+        gc_status_color[0] = GC_STATUS_COLOR_OK;
+    }
+
+    static int status_old[4] = { -1 };
+    gc_inputs inputs[4];
+    int err = gc_get_all_inputs(inputs);
+    int i = 0;
+    for (int id = IDC_GCSTATUS_1; id <= IDC_GCSTATUS_4; id++) {
+        label = GetDlgItem(diag, id);
+
+        int status;
+        if (err) {
+            status = 0;
+        } else {
+            if (gc_is_present(inputs[i].status)) {
+                status = 1;
+            } else {
+                status = 2;
+            }
+        }
+
+        if (status != status_old[i] || force_refresh) {
+            switch (status)
+            {
+            case 0: // err
+                SetWindowText(label, "N/A");
+                EnableWindow(label, FALSE);
+                break;
+            case 1:
+                EnableWindow(label, TRUE);
+                SetWindowText(label, "OK");
+                break;
+            case 2:
+                EnableWindow(label, FALSE);
+                SetWindowText(label, "Not detected");
+            }
+
+            status_old[i] = status;
+        }
+
+        i++;
+    }
+
+}
+
+void init_gc_status(HWND diag)
+{
+    SetTimer(diag, GC_STATUS_REFRESH_ID, GC_STATUS_REFRESH_MS, NULL);
+    refresh_gc_status(diag, 1);
+}
+
 int restart_required()
 {
     if (cfg.async != cfg_old.async)
@@ -240,6 +341,7 @@ INT_PTR CALLBACK dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lParam)
         cfg_old = cfg;
         init_all(diag);
         init_tabs(diag);
+        init_gc_status(diag);
         break;
     case WM_CLOSE:
         DestroyWindow(mapping_tab);
@@ -277,6 +379,20 @@ INT_PTR CALLBACK dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_HSCROLL:
         slider_updatecfg(diag, (HWND)lParam);
         break;
+    case WM_TIMER:
+        if (wParam == GC_STATUS_REFRESH_ID) {
+            refresh_gc_status(diag, 0);
+        }
+        break;
+    case WM_CTLCOLORSTATIC: ;
+        HDC hdc = (HDC)wParam;
+        int id = GetWindowLong((HWND)lParam, GWL_ID);
+
+        if (id >= IDC_GCSTATUS_ADAPTER && id <= IDC_GCSTATUS_4) {
+            SetBkMode(hdc, TRANSPARENT);
+            SetTextColor(hdc, gc_status_color[id-IDC_GCSTATUS_ADAPTER]);
+            return (INT_PTR)GetSysColorBrush(COLOR_BTNFACE); 
+        }
     default:
         return FALSE;
     }

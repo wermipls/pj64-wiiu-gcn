@@ -12,6 +12,7 @@ unsigned char endpoint_out = 0x02;
 
 libusb_device_handle *device;
 static atomic_int initialized = 0;
+static atomic_int pending_deinit = 0;
 static atomic_int is_async = 0;
 static _Atomic enum GCError init_error = GCERR_NOT_INITIALIZED;
 
@@ -125,6 +126,14 @@ void gc_deinit()
     init_error = GCERR_NOT_INITIALIZED;
 }
 
+void handle_pending_deinit()
+{
+    if (pending_deinit) {
+        gc_deinit();
+        pending_deinit = 0;
+    }
+}
+
 int gc_is_present(int status)
 {
     return status;
@@ -132,7 +141,7 @@ int gc_is_present(int status)
 
 int gc_poll_inputs()
 {
-    if (!initialized) return -1;
+    if (!initialized || pending_deinit) return -1;
 
     unsigned char readbuf[37];
     int transferred = 0;
@@ -144,8 +153,8 @@ int gc_poll_inputs()
         if (err == LIBUSB_ERROR_TIMEOUT) {
             dlog(LOG_WARN, "Failed in transfer, %s", libusb_error_name(err));
         } else {
-            dlog(LOG_ERR, "Failed in transfer, %s", libusb_error_name(err));
-            gc_deinit();
+            dlog(LOG_ERR_NO_MSGBOX, "Failed in transfer, %s", libusb_error_name(err));
+            pending_deinit = 1;
         }
         return -2;
     }
@@ -210,6 +219,7 @@ DWORD WINAPI gc_polling_thread(LPVOID param)
 
 int gc_get_inputs(int index, gc_inputs *inputs)
 {
+    handle_pending_deinit();
     if (!initialized) return -1;
 
     if (!is_async) {
@@ -233,6 +243,7 @@ int gc_get_inputs(int index, gc_inputs *inputs)
 
 int gc_get_all_inputs(gc_inputs inputs[4])
 {
+    handle_pending_deinit();
     if (!initialized) return -1;
 
     if (!is_async) {
