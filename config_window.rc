@@ -1,10 +1,10 @@
 #include "resource.h"
 #include <windows.h>
 
-#define MAPPINGCTLS(name, id, x, y)                                     \
-    LTEXT       name, -1, (x),     (y)+2, 23, 9                         \
-    COMBOBOX    id,       (x)+25,  (y),   70, 90, CBS_DROPDOWN          \
-    COMBOBOX    id+100,   (x)+100, (y),   70, 90, CBS_DROPDOWN          
+#define MAPPINGCTLS(name, id, x, y)                                         \
+    LTEXT       name, -1, (x),     (y)+2, 23, 9                             \
+    COMBOBOX    id,       (x)+25,  (y),   70, 90, CBS_DROPDOWN | WS_TABSTOP \
+    COMBOBOX    id+100,   (x)+100, (y),   70, 90, CBS_DROPDOWN | WS_TABSTOP 
 
 #define MAPGRP_OFFSET_X 10
 #define MAPGRP_OFFSET_Y 28
@@ -22,10 +22,10 @@
     LTEXT       name,           -1, x,    y, 28, 10                     \
     LTEXT       "Not detected", id, x+30, y, 50, 10, WS_DISABLED
 
-#define PERCENTSLIDER(id_slider, id_label, name, x, y)                  \
-    LTEXT       name, -1,          (x), 14+(y), 60,   8                 \
-    CTEXT       "0%", id_label, 65+(x), 22+(y), 105,  8                 \
-    CONTROL     "", id_slider, "msctls_trackbar32", TBS_HORZ,           \
+#define PERCENTSLIDER(id_slider, id_label, name, x, y)                      \
+    LTEXT       name, -1,          (x), 14+(y), 60,   8                     \
+    CTEXT       "0%", id_label, 65+(x), 22+(y), 105,  8                     \
+    CONTROL     "", id_slider, "msctls_trackbar32", TBS_HORZ | WS_TABSTOP,  \
                                 65+(x), 10+(y), 105, 12
 
 
@@ -36,8 +36,6 @@ CAPTION "pj64-wiiu-gcn config"
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 FONT 8, "MS Shell Dlg"
 BEGIN
-    CONTROL "", IDC_TABCONTROL, "SysTabControl32", 0, 5, 5, 405, 280, WS_EX_CONTROLPARENT
- 
     #define SIDE_X 420
     #define GRP_Y 12
 
@@ -54,7 +52,7 @@ BEGIN
     CONTROL     "Async polling", IDC_ASYNC, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 
                 SIDE_X+10,    GRP_Y+70, 80, 10 
     PUSHBUTTON  "Test adapter pollrate", IDC_TESTPOLL, 
-                SIDE_X+10+90, GRP_Y+67, 80, 14 
+                SIDE_X+10+90, GRP_Y+67, 80, 14
 
 
     #undef  GRP_Y
@@ -70,15 +68,17 @@ BEGIN
                   10+SIDE_X, 5+GRP_Y+24*3)
 
     CONTROL "Scale diagonals for stick->button mapping", IDC_SCALEDIAGONALS, 
-            "Button", BS_AUTOCHECKBOX, SIDE_X+10, GRP_Y+112, 175, 10
+            "Button", BS_AUTOCHECKBOX | WS_TABSTOP, SIDE_X+10, GRP_Y+112, 175, 10
 
 
-    CONTROL "Use single mapping for all controllers", IDC_SINGLEMAPPING, 
-            "Button", BS_AUTOCHECKBOX, SIDE_X+5, 251, 200, 10
+    CONTROL "Use Controller 1 mapping for all controllers", IDC_SINGLEMAPPING, 
+            "Button", BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP, SIDE_X+5, 251, 200, 10
 
-    PUSHBUTTON "Load defaults", IDC_DEFAULTS, SIDE_X,     270, 55, 14, WS_GROUP | WS_TABSTOP
+    PUSHBUTTON "Load defaults", IDC_DEFAULTS, SIDE_X,     270, 55, 14
     PUSHBUTTON "Save config",   IDC_SAVE,     SIDE_X+78,  270, 67, 14 
     PUSHBUTTON "Cancel",        IDC_CANCEL,   SIDE_X+150, 270, 41, 14 
+
+    CONTROL "", IDC_TABCONTROL, "SysTabControl32", WS_TABSTOP, 5, 5, 405, 280
 END
 
 102 DIALOGEX 0, 0, 405, 280
@@ -88,18 +88,29 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 FONT 8, "MS Shell Dlg"
 BEGIN
     #undef GRP_Y
-    #define GRP_X 205
+
+    #define GRP_X 5
     #define GRP_Y 5
-    MAPPINGGROUP("Buttons",GRP_X,GRP_Y,6)
+    CONTROL "Enabled",          IDC_MAPPING_ENABLED,      "Button", BS_AUTOCHECKBOX | WS_TABSTOP,
+            GRP_X+5, GRP_Y+5, 80, 10 
+    CONTROL "Force plugged in", IDC_MAPPING_FORCEPLUGGED, "Button", BS_AUTOCHECKBOX | WS_TABSTOP,
+            GRP_X+5, GRP_Y+20, 80, 10 
+    
+    COMBOBOX IDC_MAPPING_ACCESSORY, GRP_X+95, GRP_Y+20, 90, 73, CBS_DROPDOWN | WS_TABSTOP
+
+    #undef GRP_X 
+    #undef GRP_Y
+
+    #define GRP_X 5
+    #define GRP_Y (155 - MAPGRP_H(4) - 10)
+    MAPPINGGROUP("C-Buttons",GRP_X,GRP_Y,4)
 
     #define CUR_X GRP_X + MAPGRP_OFFSET_X
     #define CUR_Y GRP_Y + MAPGRP_OFFSET_Y
-    MAPPINGCTLS("A",    IDC_MAPPING_A,    CUR_X, CUR_Y + 0*MAPCTL_OFFSET_Y)
-    MAPPINGCTLS("B",    IDC_MAPPING_B,    CUR_X, CUR_Y + 1*MAPCTL_OFFSET_Y)
-    MAPPINGCTLS("Z",    IDC_MAPPING_Z,    CUR_X, CUR_Y + 2*MAPCTL_OFFSET_Y)
-    MAPPINGCTLS("L",    IDC_MAPPING_L,    CUR_X, CUR_Y + 3*MAPCTL_OFFSET_Y)
-    MAPPINGCTLS("R",    IDC_MAPPING_R,    CUR_X, CUR_Y + 4*MAPCTL_OFFSET_Y)
-    MAPPINGCTLS("Start",IDC_MAPPING_START,CUR_X, CUR_Y + 5*MAPCTL_OFFSET_Y)
+    MAPPINGCTLS("Up",    IDC_MAPPING_CUP,        CUR_X, CUR_Y + 0*MAPCTL_OFFSET_Y)
+    MAPPINGCTLS("Down",  IDC_MAPPING_CDOWN,      CUR_X, CUR_Y + 1*MAPCTL_OFFSET_Y)
+    MAPPINGCTLS("Left",  IDC_MAPPING_CLEFT,      CUR_X, CUR_Y + 2*MAPCTL_OFFSET_Y)
+    MAPPINGCTLS("Right", IDC_MAPPING_CRIGHT,     CUR_X, CUR_Y + 3*MAPCTL_OFFSET_Y)
 
     #undef CUR_X 
     #undef CUR_Y 
@@ -122,16 +133,18 @@ BEGIN
     #undef GRP_X 
     #undef GRP_Y
 
-    #define GRP_X 5
-    #define GRP_Y (155 - MAPGRP_H(4) - 10)
-    MAPPINGGROUP("C-Buttons",GRP_X,GRP_Y,4)
+    #define GRP_X 205
+    #define GRP_Y 5
+    MAPPINGGROUP("Buttons",GRP_X,GRP_Y,6)
 
     #define CUR_X GRP_X + MAPGRP_OFFSET_X
     #define CUR_Y GRP_Y + MAPGRP_OFFSET_Y
-    MAPPINGCTLS("Up",    IDC_MAPPING_CUP,        CUR_X, CUR_Y + 0*MAPCTL_OFFSET_Y)
-    MAPPINGCTLS("Down",  IDC_MAPPING_CDOWN,      CUR_X, CUR_Y + 1*MAPCTL_OFFSET_Y)
-    MAPPINGCTLS("Left",  IDC_MAPPING_CLEFT,      CUR_X, CUR_Y + 2*MAPCTL_OFFSET_Y)
-    MAPPINGCTLS("Right", IDC_MAPPING_CRIGHT,     CUR_X, CUR_Y + 3*MAPCTL_OFFSET_Y)
+    MAPPINGCTLS("A",    IDC_MAPPING_A,    CUR_X, CUR_Y + 0*MAPCTL_OFFSET_Y)
+    MAPPINGCTLS("B",    IDC_MAPPING_B,    CUR_X, CUR_Y + 1*MAPCTL_OFFSET_Y)
+    MAPPINGCTLS("Z",    IDC_MAPPING_Z,    CUR_X, CUR_Y + 2*MAPCTL_OFFSET_Y)
+    MAPPINGCTLS("L",    IDC_MAPPING_L,    CUR_X, CUR_Y + 3*MAPCTL_OFFSET_Y)
+    MAPPINGCTLS("R",    IDC_MAPPING_R,    CUR_X, CUR_Y + 4*MAPCTL_OFFSET_Y)
+    MAPPINGCTLS("Start",IDC_MAPPING_START,CUR_X, CUR_Y + 5*MAPCTL_OFFSET_Y)
 
     #undef CUR_X 
     #undef CUR_Y 
@@ -148,17 +161,5 @@ BEGIN
     MAPPINGCTLS("Down",  IDC_MAPPING_DOWN,      CUR_X, CUR_Y + 1*MAPCTL_OFFSET_Y)
     MAPPINGCTLS("Left",  IDC_MAPPING_LEFT,      CUR_X, CUR_Y + 2*MAPCTL_OFFSET_Y)
     MAPPINGCTLS("Right", IDC_MAPPING_RIGHT,     CUR_X, CUR_Y + 3*MAPCTL_OFFSET_Y)
-
-    #undef GRP_X 
-    #undef GRP_Y
-
-    #define GRP_X 5
-    #define GRP_Y 5
-    CONTROL "Enabled",          IDC_MAPPING_ENABLED,      "Button", BS_AUTOCHECKBOX,
-            GRP_X+5, GRP_Y+5, 80, 10 
-    CONTROL "Force plugged in", IDC_MAPPING_FORCEPLUGGED, "Button", BS_AUTOCHECKBOX,
-            GRP_X+5, GRP_Y+20, 80, 10 
-    
-    COMBOBOX IDC_MAPPING_ACCESSORY, GRP_X+95, GRP_Y+20, 90, 73, CBS_DROPDOWN
 END
 
