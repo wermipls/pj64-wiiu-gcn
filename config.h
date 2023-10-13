@@ -34,13 +34,15 @@ struct Mapping
     enum MappingButtonAxis sec;
 };
 
+// enum values are same as zilmar-spec, except decremented by 1
+// (see zilmar_controller_1.0.h)
 enum Accessory
 {
-    ACCESSORY_NONE,
-    ACCESSORY_CPAK,
+    ACCESSORY_NONE = 0,
+    ACCESSORY_CPAK = 1,
 };
 
-struct ConfigMapping
+struct ConfigController
 {
     int enabled;
     int force_plugged;
@@ -65,7 +67,23 @@ struct ConfigMapping
     struct Mapping analog_down;
 };
 
-struct config 
+struct ConfigControllerEx
+{
+    struct _cfgctlex_fields
+    {
+    };
+
+    // maintain constant struct size for backwards compatible expansion
+    // without requiring version-specific checks.
+
+    // truth is, i should have included reserved space in the other struct
+    // instead of making a new one, but lol actually anticipating change lmao
+    char _reserved[256 - sizeof(struct _cfgctlex_fields)];
+};
+
+_Static_assert(sizeof(struct ConfigControllerEx) == 256, "ConfigControllerEx struct is not 256 bytes");
+
+struct Config 
 {
     char header[4];
     unsigned int version;
@@ -77,10 +95,11 @@ struct config
     int scale_diagonals;
     int single_mapping;
 
-    struct ConfigMapping mapping[4];
+    struct ConfigController controller[4];
+    struct ConfigControllerEx controller_ex[4];
 };
 
-extern struct config cfg;
+extern struct Config cfg;
 
 void config_defaults();
 void config_load();

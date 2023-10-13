@@ -12,7 +12,7 @@
 #define GC_STATUS_COLOR_OK   RGB(64, 160, 0)
 #define GC_STATUS_COLOR_ERR  RGB(192, 0, 64)
 
-static struct config cfg_old;
+static struct Config cfg_old;
 static HINSTANCE hinstance;
 static HWND mapping_tab;
 
@@ -40,7 +40,7 @@ void init_mapping(HWND diag, int id)
 
 enum MappingButtonAxis *baptr_from_idc(int id)
 {
-    struct ConfigMapping *cfgmap = &cfg.mapping[current_tab];
+    struct ConfigController *cfgmap = &cfg.controller[current_tab];
     struct Mapping *map = 0;
     int is_sec = 0;
     if (id >= IDC_MAPPING_SECONDARY_A) {
@@ -97,12 +97,12 @@ void update_mapping_tab(HWND diag)
     }
 
     CheckDlgButton(diag, IDC_MAPPING_ENABLED, 
-                         cfg.mapping[current_tab].enabled);
+                         cfg.controller[current_tab].enabled);
     CheckDlgButton(diag, IDC_MAPPING_FORCEPLUGGED, 
-                         cfg.mapping[current_tab].force_plugged);
+                         cfg.controller[current_tab].force_plugged);
 
     HWND accessory = GetDlgItem(diag, IDC_MAPPING_ACCESSORY);
-    int selection = cfg.mapping[current_tab].accessory;
+    int selection = cfg.controller[current_tab].accessory;
     SendMessage(accessory, CB_SETCURSEL, selection, 0);
 }
 
@@ -148,7 +148,7 @@ INT_PTR CALLBACK mapping_dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lPar
                 update_mapping_config(diag, id);
                 break;
             } else if (id == IDC_MAPPING_ACCESSORY) {
-                cfg.mapping[current_tab].accessory = SendMessage((HWND)lParam, CB_GETCURSEL, 0, 0);
+                cfg.controller[current_tab].accessory = SendMessage((HWND)lParam, CB_GETCURSEL, 0, 0);
                 break;
             }
         }
@@ -156,10 +156,10 @@ INT_PTR CALLBACK mapping_dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lPar
         switch (id)
         {
         case IDC_MAPPING_ENABLED:
-            cfg.mapping[current_tab].enabled = IsDlgButtonChecked(diag, id) ? 1 : 0;
+            cfg.controller[current_tab].enabled = IsDlgButtonChecked(diag, id) ? 1 : 0;
             return TRUE;
         case IDC_MAPPING_FORCEPLUGGED:
-            cfg.mapping[current_tab].force_plugged = IsDlgButtonChecked(diag, id) ? 1 : 0;
+            cfg.controller[current_tab].force_plugged = IsDlgButtonChecked(diag, id) ? 1 : 0;
             return TRUE;
         }
 

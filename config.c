@@ -7,7 +7,7 @@
 #include <shlobj.h>
 #include <shlwapi.h>
 
-struct config cfg;
+struct Config cfg;
 
 static char configpath[MAX_PATH];
 int is_initialized = 0;
@@ -41,7 +41,7 @@ void config_defaults()
     cfg.single_mapping = 0;
     cfg.scale_diagonals = 1;
 
-    struct ConfigMapping m = {0};
+    struct ConfigController m = {0};
 
     m.enabled = 1;
     m.accessory = ACCESSORY_NONE;
@@ -68,10 +68,17 @@ void config_defaults()
     m.d_left.pri  = BA_DLEFT;
     m.d_right.pri = BA_DRIGHT;
 
-    cfg.mapping[0] = m;
-    cfg.mapping[1] = m;
-    cfg.mapping[2] = m;
-    cfg.mapping[3] = m;
+    cfg.controller[0] = m;
+    cfg.controller[1] = m;
+    cfg.controller[2] = m;
+    cfg.controller[3] = m;
+
+    struct ConfigControllerEx ex = {0};
+
+    cfg.controller_ex[0] = ex;
+    cfg.controller_ex[1] = ex;
+    cfg.controller_ex[2] = ex;
+    cfg.controller_ex[3] = ex;
 }
 
 void config_load()
@@ -89,7 +96,7 @@ void config_load()
         return;
     }
 
-    struct config cfg_new;
+    struct Config cfg_new;
 
     size_t bytes = fread(&cfg_new, 1, sizeof(cfg_new), f);
     if (bytes != sizeof(cfg_new)) {

@@ -88,28 +88,28 @@ EXPORT void CALL GetKeys(int Control, BUTTONS *Keys)
     process_inputs_analog(&i);
 
     // mappings here LOL
-    Keys->A_BUTTON = get_mapping_state(&i, &id, cfg.mapping[Control].a, 0);
-    Keys->B_BUTTON = get_mapping_state(&i, &id, cfg.mapping[Control].b, 0);
-    Keys->Z_TRIG = get_mapping_state(&i, &id, cfg.mapping[Control].z, 0);
-    Keys->L_TRIG = get_mapping_state(&i, &id, cfg.mapping[Control].l, 0);
-    Keys->R_TRIG = get_mapping_state(&i, &id, cfg.mapping[Control].r, 0);
-    Keys->START_BUTTON = get_mapping_state(&i, &id, cfg.mapping[Control].start, 0);
+    Keys->A_BUTTON = get_mapping_state(&i, &id, cfg.controller[Control].a, 0);
+    Keys->B_BUTTON = get_mapping_state(&i, &id, cfg.controller[Control].b, 0);
+    Keys->Z_TRIG = get_mapping_state(&i, &id, cfg.controller[Control].z, 0);
+    Keys->L_TRIG = get_mapping_state(&i, &id, cfg.controller[Control].l, 0);
+    Keys->R_TRIG = get_mapping_state(&i, &id, cfg.controller[Control].r, 0);
+    Keys->START_BUTTON = get_mapping_state(&i, &id, cfg.controller[Control].start, 0);
 
-    Keys->L_CBUTTON = get_mapping_state(&i, &id, cfg.mapping[Control].c_left, 0);
-    Keys->R_CBUTTON = get_mapping_state(&i, &id, cfg.mapping[Control].c_right, 0);
-    Keys->D_CBUTTON = get_mapping_state(&i, &id, cfg.mapping[Control].c_down, 0);
-    Keys->U_CBUTTON = get_mapping_state(&i, &id, cfg.mapping[Control].c_up, 0);
+    Keys->L_CBUTTON = get_mapping_state(&i, &id, cfg.controller[Control].c_left, 0);
+    Keys->R_CBUTTON = get_mapping_state(&i, &id, cfg.controller[Control].c_right, 0);
+    Keys->D_CBUTTON = get_mapping_state(&i, &id, cfg.controller[Control].c_down, 0);
+    Keys->U_CBUTTON = get_mapping_state(&i, &id, cfg.controller[Control].c_up, 0);
 
-    Keys->L_DPAD = get_mapping_state(&i, &id, cfg.mapping[Control].d_left, 0);
-    Keys->R_DPAD = get_mapping_state(&i, &id, cfg.mapping[Control].d_right, 0);
-    Keys->D_DPAD = get_mapping_state(&i, &id, cfg.mapping[Control].d_down, 0);
-    Keys->U_DPAD = get_mapping_state(&i, &id, cfg.mapping[Control].d_up, 0);
+    Keys->L_DPAD = get_mapping_state(&i, &id, cfg.controller[Control].d_left, 0);
+    Keys->R_DPAD = get_mapping_state(&i, &id, cfg.controller[Control].d_right, 0);
+    Keys->D_DPAD = get_mapping_state(&i, &id, cfg.controller[Control].d_down, 0);
+    Keys->U_DPAD = get_mapping_state(&i, &id, cfg.controller[Control].d_up, 0);
 
-    Keys->X_AXIS = get_mapping_state(&i, &id, cfg.mapping[Control].analog_up, 1)
-                 - get_mapping_state(&i, &id, cfg.mapping[Control].analog_down, 1);
+    Keys->X_AXIS = get_mapping_state(&i, &id, cfg.controller[Control].analog_up, 1)
+                 - get_mapping_state(&i, &id, cfg.controller[Control].analog_down, 1);
 
-    Keys->Y_AXIS = get_mapping_state(&i, &id, cfg.mapping[Control].analog_right, 1)
-                 - get_mapping_state(&i, &id, cfg.mapping[Control].analog_left, 1);
+    Keys->Y_AXIS = get_mapping_state(&i, &id, cfg.controller[Control].analog_right, 1)
+                 - get_mapping_state(&i, &id, cfg.controller[Control].analog_left, 1);
 }
 
 EXPORT void CALL InitiateControllers(HWND hMainWindow, CONTROL Controls[4])
@@ -148,16 +148,16 @@ EXPORT void CALL InitiateControllers(HWND hMainWindow, CONTROL Controls[4])
         int mi = cfg.single_mapping ? 0 : i;
 
         if (gc_is_present(status)) {
-            Controls[i].Present = cfg.mapping[mi].enabled ? TRUE : FALSE;
+            Controls[i].Present = cfg.controller[mi].enabled ? TRUE : FALSE;
             dlog(LOG_INFO, "Controller %d present, status 0x%X", i, status);
             ++concount;
         } else {
-            Controls[i].Present = cfg.mapping[mi].force_plugged && cfg.mapping[mi].enabled ? TRUE : FALSE;
+            Controls[i].Present = cfg.controller[mi].force_plugged && cfg.controller[mi].enabled ? TRUE : FALSE;
             dlog(LOG_INFO, "Controller %d not available, status 0x%X", i, status);
         }
 
         Controls[i].RawData = FALSE;
-        Controls[i].Plugin = PLUGIN_NONE + cfg.mapping[mi].accessory;
+        Controls[i].Plugin = PLUGIN_NONE + cfg.controller[mi].accessory;
     }
 
     if (concount == 0) {
