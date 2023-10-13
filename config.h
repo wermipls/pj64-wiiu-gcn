@@ -71,6 +71,7 @@ struct ConfigControllerEx
 {
     struct _cfgctlex_fields
     {
+        int adapter_port;
     };
 
     // maintain constant struct size for backwards compatible expansion

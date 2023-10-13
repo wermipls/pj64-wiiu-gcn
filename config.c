@@ -79,6 +79,11 @@ void config_defaults()
     cfg.controller_ex[1] = ex;
     cfg.controller_ex[2] = ex;
     cfg.controller_ex[3] = ex;
+
+    cfg.controller_ex[0].adapter_port = 0;
+    cfg.controller_ex[1].adapter_port = 1;
+    cfg.controller_ex[2].adapter_port = 2;
+    cfg.controller_ex[3].adapter_port = 3;
 }
 
 void config_load()

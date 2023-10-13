@@ -104,6 +104,10 @@ void update_mapping_tab(HWND diag)
     HWND accessory = GetDlgItem(diag, IDC_MAPPING_ACCESSORY);
     int selection = cfg.controller[current_tab].accessory;
     SendMessage(accessory, CB_SETCURSEL, selection, 0);
+
+    HWND port = GetDlgItem(diag, IDC_MAPPING_PORT);
+    selection = cfg.controller_ex[current_tab].adapter_port;
+    SendMessage(port, CB_SETCURSEL, selection, 0);
 }
 
 void init_mapping_tab(HWND diag)
@@ -121,6 +125,19 @@ void init_mapping_tab(HWND diag)
     for (size_t i = 0; i < sizeof(accessory_label)/sizeof(char*); i++) {
         const char *str = accessory_label[i];
         SendMessage(accessory, CB_ADDSTRING, 0, (LPARAM)str);
+    }
+
+    static const char *port_label[] = {
+        "Adapter port 1",
+        "Adapter port 2",
+        "Adapter port 3",
+        "Adapter port 4",
+    };
+
+    HWND port = GetDlgItem(diag, IDC_MAPPING_PORT);
+    for (size_t i = 0; i < sizeof(port_label)/sizeof(char*); i++) {
+        const char *str = port_label[i];
+        SendMessage(port, CB_ADDSTRING, 0, (LPARAM)str);
     }
 
     update_mapping_tab(diag);
@@ -149,6 +166,9 @@ INT_PTR CALLBACK mapping_dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lPar
                 break;
             } else if (id == IDC_MAPPING_ACCESSORY) {
                 cfg.controller[current_tab].accessory = SendMessage((HWND)lParam, CB_GETCURSEL, 0, 0);
+                break;
+            } else if (id == IDC_MAPPING_PORT) {
+                cfg.controller_ex[current_tab].adapter_port = SendMessage((HWND)lParam, CB_GETCURSEL, 0, 0);
                 break;
             }
         }

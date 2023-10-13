@@ -67,3 +67,4 @@
 #define IDC_MAPPING_ENABLED             1300
 #define IDC_MAPPING_FORCEPLUGGED        1301
 #define IDC_MAPPING_ACCESSORY           1302
+#define IDC_MAPPING_PORT                1303

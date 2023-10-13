@@ -71,7 +71,8 @@ EXPORT void CALL GetKeys(int Control, BUTTONS *Keys)
 {
     gc_inputs i;
 
-    int err = gc_get_inputs(Control, &i);
+    int port = cfg.controller_ex[Control].adapter_port;
+    int err = gc_get_inputs(port, &i);
     if (err)
         return;
 
@@ -144,16 +145,18 @@ EXPORT void CALL InitiateControllers(HWND hMainWindow, CONTROL Controls[4])
     int concount = 0;
 
     for (int i = 0; i < 4; ++i) {
-        int status = gc[i].status;
-        int mi = cfg.single_mapping ? 0 : i;
+        int port = cfg.controller_ex[i].adapter_port;
+        int status = gc[port].status;
+        int mi = cfg.single_mapping ? 0 : port;
 
         if (gc_is_present(status)) {
             Controls[i].Present = cfg.controller[mi].enabled ? TRUE : FALSE;
-            dlog(LOG_INFO, "Controller %d present, status 0x%X", i, status);
+            dlog(LOG_INFO, "Controller %d (port %d) present, status 0x%X", i, port, status);
             ++concount;
         } else {
-            Controls[i].Present = cfg.controller[mi].force_plugged && cfg.controller[mi].enabled ? TRUE : FALSE;
-            dlog(LOG_INFO, "Controller %d not available, status 0x%X", i, status);
+            Controls[i].Present = (cfg.controller[mi].force_plugged 
+                                   && cfg.controller[mi].enabled) ? TRUE : FALSE;
+            dlog(LOG_INFO, "Controller %d (port %d) not available, status 0x%X", i, port, status);
         }
 
         Controls[i].RawData = FALSE;
@@ -164,7 +167,8 @@ EXPORT void CALL InitiateControllers(HWND hMainWindow, CONTROL Controls[4])
         MessageBox(
             hMainWindow, 
             "No controllers detected.\n\n"
-            "Please plug in a controller, then restart the emulator.",
+            "Please plug in a controller and make sure port assignment is correct, "
+            "then restart the emulator.",
             PLUGIN_NAME " info", MB_OK | MB_ICONINFORMATION
         );
     }
