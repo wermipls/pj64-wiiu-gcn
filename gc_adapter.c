@@ -24,6 +24,8 @@ HANDLE polltest_start;
 HANDLE polltest_end;
 atomic_int poll_count = 0;
 
+static atomic_int rumble_enabled[4] = {0};
+
 static gc_inputs gc[4];
 
 DWORD WINAPI gc_polling_thread(LPVOID param);
@@ -262,6 +264,35 @@ int gc_get_all_inputs(gc_inputs inputs[4])
     inputs[3] = gc[3];
 
     LeaveCriticalSection(&gc_critical);
+
+    return 0;
+}
+
+int gc_set_rumble(int index, int enabled)
+{
+    handle_pending_deinit();
+    if (!initialized) return -1;
+
+    if (index < 0 || index >= 4)
+        return -2;
+
+    rumble_enabled[index] = !(!enabled);
+
+    uint8_t cmd[5] = {
+        0x11,
+        rumble_enabled[0],
+        rumble_enabled[1],
+        rumble_enabled[2],
+        rumble_enabled[3],
+    };
+
+    int transferred = 0;
+    int err = libusb_interrupt_transfer(
+        device, endpoint_out, cmd, sizeof(cmd), &transferred, 16
+    );
+    if (err) {
+        dlog(LOG_ERR, "Failed out transfer, %s", libusb_error_name(err));
+    }
 
     return 0;
 }

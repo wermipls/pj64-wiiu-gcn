@@ -10,6 +10,7 @@
 #include "plugin_info.h"
 #include "mapping.h"
 #include "log.h"
+#include "pak.h"
 
 HINSTANCE hInstance;
 
@@ -71,7 +72,7 @@ EXPORT void CALL GetKeys(int Control, BUTTONS *Keys)
 {
     gc_inputs i;
 
-    int port = cfg.controller_ex[Control].adapter_port;
+    int port = get_port_mapping(Control);
     int err = gc_get_inputs(port, &i);
     if (err)
         return;
@@ -145,7 +146,7 @@ EXPORT void CALL InitiateControllers(HWND hMainWindow, CONTROL Controls[4])
     int concount = 0;
 
     for (int i = 0; i < 4; ++i) {
-        int port = cfg.controller_ex[i].adapter_port;
+        int port = get_port_mapping(i);
         int status = gc[port].status;
         int mi = cfg.single_mapping ? 0 : port;
 
@@ -160,7 +161,17 @@ EXPORT void CALL InitiateControllers(HWND hMainWindow, CONTROL Controls[4])
         }
 
         Controls[i].RawData = FALSE;
-        Controls[i].Plugin = PLUGIN_NONE + cfg.controller[mi].accessory;
+        switch (cfg.controller[mi].accessory)
+        {
+        case ACCESSORY_NONE:
+        case ACCESSORY_CPAK:
+            Controls[i].Plugin = PLUGIN_NONE + cfg.controller[mi].accessory;
+            break;
+        case ACCESSORY_RUMBLE:
+            Controls[i].RawData = TRUE;
+            Controls[i].Plugin = PLUGIN_RAW;
+            break;
+        }
     }
 
     if (concount == 0) {
@@ -174,7 +185,54 @@ EXPORT void CALL InitiateControllers(HWND hMainWindow, CONTROL Controls[4])
     }
 }
 
-//EXPORT void CALL ReadController(int Control, BYTE *Command);
+EXPORT void CALL ControllerCommand(int Control, BYTE *Command)
+{
+
+}
+
+EXPORT void CALL ReadController(int Control, BYTE *Command)
+{
+    if (Control == -1)
+        return; // why make a call in the 1st place if there's nothing to do?
+
+    // from what i understand:
+    // Command[0] is command + data length sent by the console
+    // Command[1] is length of our response in bytes
+    // so the actual data (command then response) only begins at Command[2]
+
+    unsigned char *len_tx   = &Command[0];
+    unsigned char *len_rx   = &Command[1];
+    unsigned char *cmd      = &Command[2];
+    unsigned char *data     = &Command[3];
+
+    switch (*cmd)
+    {
+    case 0xFF: // controller info/reset
+    case 0x00: // controller info
+        data[0] = 0x05; // normal n64 controller
+        data[1] = 0x00; 
+        data[2] = 0x01; // rumble/cpak
+        break;
+    case 0x01: // controller status
+        GetKeys(Control, (BUTTONS*)data); // HACK: this would optimally be a separate func
+        break;
+    case 0x02: // peripheral read
+        pak_read(
+            Control,
+            data[1] | (data[0] << 8),
+            data+2);
+        break;
+    case 0x03: // peripheral write
+        pak_write(
+            Control,
+            data[1] | ((uint16_t)data[0] << 8),
+            data+2);
+        break;
+    default:
+        *len_rx = *len_rx | 0x80;
+        break; 
+    }
+}
 
 EXPORT void CALL RomClosed(void)
 {

@@ -119,6 +119,7 @@ void init_mapping_tab(HWND diag)
     static const char *accessory_label[] = {
         "No accessory",
         "Controller Pak",
+        "Rumble Pak",
     };
 
     HWND accessory = GetDlgItem(diag, IDC_MAPPING_ACCESSORY);

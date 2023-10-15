@@ -40,6 +40,7 @@ enum Accessory
 {
     ACCESSORY_NONE = 0,
     ACCESSORY_CPAK = 1,
+    ACCESSORY_RUMBLE = 2,
 };
 
 struct ConfigController
