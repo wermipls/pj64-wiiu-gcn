@@ -396,6 +396,12 @@ int restart_required()
     if (cfg.async != cfg_old.async)
         return 1;
 
+    for (size_t i = 0; i < 4; i++) {
+        if (cfg.controller[i].accessory != cfg_old.controller[i].accessory) {
+            return 1;
+        }
+    }
+
     return 0;
 }
 
@@ -441,7 +447,7 @@ INT_PTR CALLBACK dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lParam)
             if (restart_required()) {
                 MessageBox(
                     diag, 
-                    "Some changes require emulator restart to take effect.", 
+                    "Some changes may require emulator restart to take effect.", 
                     "Info", MB_OK | MB_ICONINFORMATION);
             }
             EndDialog(diag, 0);
