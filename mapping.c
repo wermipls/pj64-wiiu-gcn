@@ -170,3 +170,8 @@ int get_mapping_state(gc_inputs *i, gc_inputs *id, struct Mapping m, int is_anal
 
     return p | s;
 }
+
+int get_port_mapping(int controller)
+{
+    return cfg.controller_ex[controller].adapter_port;
+}

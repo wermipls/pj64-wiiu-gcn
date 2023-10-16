@@ -12,7 +12,7 @@
 #define GC_STATUS_COLOR_OK   RGB(64, 160, 0)
 #define GC_STATUS_COLOR_ERR  RGB(192, 0, 64)
 
-static struct config cfg_old;
+static struct Config cfg_old;
 static HINSTANCE hinstance;
 static HWND mapping_tab;
 
@@ -40,7 +40,7 @@ void init_mapping(HWND diag, int id)
 
 enum MappingButtonAxis *baptr_from_idc(int id)
 {
-    struct ConfigMapping *cfgmap = &cfg.mapping[current_tab];
+    struct ConfigController *cfgmap = &cfg.controller[current_tab];
     struct Mapping *map = 0;
     int is_sec = 0;
     if (id >= IDC_MAPPING_SECONDARY_A) {
@@ -97,13 +97,17 @@ void update_mapping_tab(HWND diag)
     }
 
     CheckDlgButton(diag, IDC_MAPPING_ENABLED, 
-                         cfg.mapping[current_tab].enabled);
+                         cfg.controller[current_tab].enabled);
     CheckDlgButton(diag, IDC_MAPPING_FORCEPLUGGED, 
-                         cfg.mapping[current_tab].force_plugged);
+                         cfg.controller[current_tab].force_plugged);
 
     HWND accessory = GetDlgItem(diag, IDC_MAPPING_ACCESSORY);
-    int selection = cfg.mapping[current_tab].accessory;
+    int selection = cfg.controller[current_tab].accessory;
     SendMessage(accessory, CB_SETCURSEL, selection, 0);
+
+    HWND port = GetDlgItem(diag, IDC_MAPPING_PORT);
+    selection = cfg.controller_ex[current_tab].adapter_port;
+    SendMessage(port, CB_SETCURSEL, selection, 0);
 }
 
 void init_mapping_tab(HWND diag)
@@ -115,12 +119,26 @@ void init_mapping_tab(HWND diag)
     static const char *accessory_label[] = {
         "No accessory",
         "Controller Pak",
+        "Rumble Pak",
     };
 
     HWND accessory = GetDlgItem(diag, IDC_MAPPING_ACCESSORY);
     for (size_t i = 0; i < sizeof(accessory_label)/sizeof(char*); i++) {
         const char *str = accessory_label[i];
         SendMessage(accessory, CB_ADDSTRING, 0, (LPARAM)str);
+    }
+
+    static const char *port_label[] = {
+        "Adapter port 1",
+        "Adapter port 2",
+        "Adapter port 3",
+        "Adapter port 4",
+    };
+
+    HWND port = GetDlgItem(diag, IDC_MAPPING_PORT);
+    for (size_t i = 0; i < sizeof(port_label)/sizeof(char*); i++) {
+        const char *str = port_label[i];
+        SendMessage(port, CB_ADDSTRING, 0, (LPARAM)str);
     }
 
     update_mapping_tab(diag);
@@ -148,7 +166,10 @@ INT_PTR CALLBACK mapping_dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lPar
                 update_mapping_config(diag, id);
                 break;
             } else if (id == IDC_MAPPING_ACCESSORY) {
-                cfg.mapping[current_tab].accessory = SendMessage((HWND)lParam, CB_GETCURSEL, 0, 0);
+                cfg.controller[current_tab].accessory = SendMessage((HWND)lParam, CB_GETCURSEL, 0, 0);
+                break;
+            } else if (id == IDC_MAPPING_PORT) {
+                cfg.controller_ex[current_tab].adapter_port = SendMessage((HWND)lParam, CB_GETCURSEL, 0, 0);
                 break;
             }
         }
@@ -156,10 +177,10 @@ INT_PTR CALLBACK mapping_dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lPar
         switch (id)
         {
         case IDC_MAPPING_ENABLED:
-            cfg.mapping[current_tab].enabled = IsDlgButtonChecked(diag, id) ? 1 : 0;
+            cfg.controller[current_tab].enabled = IsDlgButtonChecked(diag, id) ? 1 : 0;
             return TRUE;
         case IDC_MAPPING_FORCEPLUGGED:
-            cfg.mapping[current_tab].force_plugged = IsDlgButtonChecked(diag, id) ? 1 : 0;
+            cfg.controller[current_tab].force_plugged = IsDlgButtonChecked(diag, id) ? 1 : 0;
             return TRUE;
         }
 
@@ -375,6 +396,12 @@ int restart_required()
     if (cfg.async != cfg_old.async)
         return 1;
 
+    for (size_t i = 0; i < 4; i++) {
+        if (cfg.controller[i].accessory != cfg_old.controller[i].accessory) {
+            return 1;
+        }
+    }
+
     return 0;
 }
 
@@ -397,6 +424,15 @@ INT_PTR CALLBACK dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lParam)
         {
         case IDC_ASYNC:
             cfg.async = IsDlgButtonChecked(diag, wParam) ? 1 : 0;
+            if (!cfg.async) {
+                MessageBox(
+                    diag,
+                    "Synchronous mode is a leftover hack from previous versions "
+                    "of the plugin, is considered deprecated and will be removed "
+                    "in a future version. Usage is discouraged.",
+                    "Warning", MB_OK | MB_ICONWARNING
+                );
+            }
             break;
         case IDC_SINGLEMAPPING:
             cfg.single_mapping = IsDlgButtonChecked(diag, wParam) ? 1 : 0;
@@ -420,7 +456,7 @@ INT_PTR CALLBACK dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lParam)
             if (restart_required()) {
                 MessageBox(
                     diag, 
-                    "Some changes require emulator restart to take effect.", 
+                    "Some changes may require emulator restart to take effect.", 
                     "Info", MB_OK | MB_ICONINFORMATION);
             }
             EndDialog(diag, 0);

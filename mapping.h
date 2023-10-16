@@ -9,3 +9,4 @@ void process_inputs_digital(gc_inputs *i);
 const char *mapping_get_label(enum MappingButtonAxis ba);
 int get_buttonaxis_state(enum MappingButtonAxis ba, gc_inputs *i, gc_inputs *id, int is_analog);
 int get_mapping_state(gc_inputs *i, gc_inputs *id, struct Mapping m, int is_analog);
+int get_port_mapping(int controller);

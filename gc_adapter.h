@@ -78,6 +78,14 @@ int gc_get_inputs(int index, gc_inputs *inputs);
  * returns 0 on success */
 int gc_get_all_inputs(gc_inputs inputs[4]);
 
+/* enables or disables the rumble motor on a specified controller.
+ * returns 0 on success */
+int gc_set_rumble(int index, int enabled);
+
+/* disables the rumble motor on all controllers.
+ * returns 0 on success */
+int gc_reset_rumble();
+
 int gc_is_async();
 
 /* counts polls over span of a second. this is a blocking function.
