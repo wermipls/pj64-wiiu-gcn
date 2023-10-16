@@ -104,6 +104,27 @@ enum GCError gc_get_init_error()
     return init_error;
 }
 
+static void gc_handle_rumble()
+{
+    if (!is_async) {
+        uint8_t cmd[5] = {
+            0x11,
+            rumble_enabled[0],
+            rumble_enabled[1],
+            rumble_enabled[2],
+            rumble_enabled[3],
+        };
+
+        int transferred = 0;
+        int err = libusb_interrupt_transfer(
+            device, endpoint_out, cmd, sizeof(cmd), &transferred, 16
+        );
+        if (err) {
+            dlog(LOG_WARN, "Failed out transfer, %s", libusb_error_name(err));
+        }
+    }
+}
+
 void gc_deinit()
 {
     dlog(LOG_INFO, "gc_deinit()");
@@ -116,7 +137,14 @@ void gc_deinit()
         dlog(LOG_INFO, "...done");
     }
 
+    rumble_enabled[0] = 0;
+    rumble_enabled[1] = 0;
+    rumble_enabled[2] = 0;
+    rumble_enabled[3] = 0;
+
     if (device) {
+        gc_handle_rumble();
+
         dlog(LOG_INFO, "Closing the adapter");
         libusb_release_interface(device, 0);
         libusb_close(device);
@@ -213,10 +241,32 @@ int gc_poll_inputs()
 
 DWORD WINAPI gc_polling_thread(LPVOID param)
 {
+    struct libusb_transfer *rumble = libusb_alloc_transfer(0);
+    uint8_t rumble_cmd[] = { 0x11, 0, 0, 0, 0 };
+    libusb_fill_interrupt_transfer(
+        rumble, device, endpoint_out, rumble_cmd, sizeof(rumble_cmd), NULL, NULL, 16);
+
     while (WaitForSingleObject(terminate_event, 0)) {
+        rumble_cmd[1] = rumble_enabled[0];
+        rumble_cmd[2] = rumble_enabled[1];
+        rumble_cmd[3] = rumble_enabled[2];
+        rumble_cmd[4] = rumble_enabled[3];
+        libusb_submit_transfer(rumble);
+
         gc_poll_inputs();
         ++poll_count;
     }
+
+    rumble_cmd[1] = 0;
+    rumble_cmd[2] = 0;
+    rumble_cmd[3] = 0;
+    rumble_cmd[4] = 0;
+
+    libusb_interrupt_transfer(
+        device, endpoint_out, rumble_cmd, sizeof(rumble_cmd), NULL, 100
+    );
+
+    libusb_free_transfer(rumble);
 
     return 0;
 }
@@ -278,21 +328,22 @@ int gc_set_rumble(int index, int enabled)
 
     rumble_enabled[index] = !(!enabled);
 
-    uint8_t cmd[5] = {
-        0x11,
-        rumble_enabled[0],
-        rumble_enabled[1],
-        rumble_enabled[2],
-        rumble_enabled[3],
-    };
+    gc_handle_rumble();
 
-    int transferred = 0;
-    int err = libusb_interrupt_transfer(
-        device, endpoint_out, cmd, sizeof(cmd), &transferred, 16
-    );
-    if (err) {
-        dlog(LOG_ERR, "Failed out transfer, %s", libusb_error_name(err));
-    }
+    return 0;
+}
+
+int gc_reset_rumble()
+{
+    handle_pending_deinit();
+    if (!initialized) return -1;
+
+    rumble_enabled[0] = 0;
+    rumble_enabled[1] = 0;
+    rumble_enabled[2] = 0;
+    rumble_enabled[3] = 0;
+
+    gc_handle_rumble();
 
     return 0;
 }

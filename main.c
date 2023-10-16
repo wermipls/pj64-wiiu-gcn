@@ -34,6 +34,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
 
 EXPORT void CALL CloseDLL(void)
 {
+    gc_reset_rumble();
 	gc_deinit();
 }
 
@@ -236,10 +237,11 @@ EXPORT void CALL ReadController(int Control, BYTE *Command)
 
 EXPORT void CALL RomClosed(void)
 {
-    // something in here
+    gc_reset_rumble();
 }
 
 EXPORT void CALL RomOpen(void)
 {
+    gc_reset_rumble();
     gc_init(cfg.async);
 }
