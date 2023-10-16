@@ -424,6 +424,15 @@ INT_PTR CALLBACK dlgproc(HWND diag, UINT msg, WPARAM wParam, LPARAM lParam)
         {
         case IDC_ASYNC:
             cfg.async = IsDlgButtonChecked(diag, wParam) ? 1 : 0;
+            if (!cfg.async) {
+                MessageBox(
+                    diag,
+                    "Synchronous mode is a leftover hack from previous versions "
+                    "of the plugin, is considered deprecated and will be removed "
+                    "in a future version. Usage is discouraged.",
+                    "Warning", MB_OK | MB_ICONWARNING
+                );
+            }
             break;
         case IDC_SINGLEMAPPING:
             cfg.single_mapping = IsDlgButtonChecked(diag, wParam) ? 1 : 0;
